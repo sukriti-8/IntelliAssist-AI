@@ -1,0 +1,366 @@
+{
+  "total_questions": 10,
+  "answerable_questions": 8,
+  "semantic_weight": 0.7,
+  "keyword_weight": 0.3,
+  "recall_at_1": 0.875,
+  "recall_at_3": 0.875,
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is the main problem addressed by the aviation analytics project?",
+      "answerable": true,
+      "expected_pages": [
+        1
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 0,
+          "source": "test.pdf",
+          "page": 1,
+          "semantic_score": 0.5447820425033569,
+          "keyword_score": 0.7,
+          "hybrid_score": 0.5913474297523498
+        },
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "semantic_score": 0.5284942388534546,
+          "keyword_score": 0.5,
+          "hybrid_score": 0.5199459671974181
+        },
+        {
+          "chunk_id": 1,
+          "source": "test.pdf",
+          "page": 1,
+          "semantic_score": 0.5279536247253418,
+          "keyword_score": 0.4,
+          "hybrid_score": 0.4895675373077392
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 2,
+      "question": "What are the costs associated with an unscheduled Aircraft-on-Ground event?",
+      "answerable": true,
+      "expected_pages": [
+        1
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 1,
+          "source": "test.pdf",
+          "page": 1,
+          "semantic_score": 0.6854062080383301,
+          "keyword_score": 0.5833333333333334,
+          "hybrid_score": 0.6547843456268311
+        },
+        {
+          "chunk_id": 0,
+          "source": "test.pdf",
+          "page": 1,
+          "semantic_score": 0.5318136215209961,
+          "keyword_score": 0.5833333333333334,
+          "hybrid_score": 0.5472695350646972
+        },
+        {
+          "chunk_id": 11,
+          "source": "test.pdf",
+          "page": 6,
+          "semantic_score": 0.44211193919181824,
+          "keyword_score": 0.3333333333333333,
+          "hybrid_score": 0.40947835743427274
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 3,
+      "question": "What dataset is used in the project?",
+      "answerable": true,
+      "expected_pages": [
+        4
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "semantic_score": 0.5729808807373047,
+          "keyword_score": 0.7142857142857143,
+          "hybrid_score": 0.6153723308018275
+        },
+        {
+          "chunk_id": 0,
+          "source": "test.pdf",
+          "page": 1,
+          "semantic_score": 0.48493027687072754,
+          "keyword_score": 0.5714285714285714,
+          "hybrid_score": 0.5108797652380807
+        },
+        {
+          "chunk_id": 11,
+          "source": "test.pdf",
+          "page": 6,
+          "semantic_score": 0.5402761697769165,
+          "keyword_score": 0.42857142857142855,
+          "hybrid_score": 0.5067647474152701
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 4,
+      "question": "What is the piecewise linear RUL target function?",
+      "answerable": true,
+      "expected_pages": [
+        2
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 3,
+          "source": "test.pdf",
+          "page": 2,
+          "semantic_score": 0.5208061933517456,
+          "keyword_score": 0.875,
+          "hybrid_score": 0.627064335346222
+        },
+        {
+          "chunk_id": 2,
+          "source": "test.pdf",
+          "page": 1,
+          "semantic_score": 0.496593713760376,
+          "keyword_score": 0.375,
+          "hybrid_score": 0.4601155996322632
+        },
+        {
+          "chunk_id": 7,
+          "source": "test.pdf",
+          "page": 4,
+          "semantic_score": 0.3815803825855255,
+          "keyword_score": 0.375,
+          "hybrid_score": 0.37960626780986784
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 5,
+      "question": "What sensors are mentioned in the project overview?",
+      "answerable": true,
+      "expected_pages": [
+        1
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 0,
+          "source": "test.pdf",
+          "page": 1,
+          "semantic_score": 0.46856606006622314,
+          "keyword_score": 0.75,
+          "hybrid_score": 0.5529962420463561
+        },
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "semantic_score": 0.5036884546279907,
+          "keyword_score": 0.625,
+          "hybrid_score": 0.5400819182395935
+        },
+        {
+          "chunk_id": 11,
+          "source": "test.pdf",
+          "page": 6,
+          "semantic_score": 0.5128402709960938,
+          "keyword_score": 0.375,
+          "hybrid_score": 0.4714881896972656
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 6,
+      "question": "What preprocessing techniques are proposed for the sensor data?",
+      "answerable": true,
+      "expected_pages": [
+        2
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "semantic_score": 0.5376161336898804,
+          "keyword_score": 0.5555555555555556,
+          "hybrid_score": 0.5429979602495829
+        },
+        {
+          "chunk_id": 7,
+          "source": "test.pdf",
+          "page": 4,
+          "semantic_score": 0.48896872997283936,
+          "keyword_score": 0.6666666666666666,
+          "hybrid_score": 0.5422781109809875
+        },
+        {
+          "chunk_id": 11,
+          "source": "test.pdf",
+          "page": 6,
+          "semantic_score": 0.5130199193954468,
+          "keyword_score": 0.5555555555555556,
+          "hybrid_score": 0.5257806102434793
+        }
+      ],
+      "recall_at_1": false,
+      "recall_at_3": false
+    },
+    {
+      "id": 7,
+      "question": "Which machine-learning approaches are being compared?",
+      "answerable": true,
+      "expected_pages": [
+        2
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 4,
+          "source": "test.pdf",
+          "page": 2,
+          "semantic_score": 0.6053169965744019,
+          "keyword_score": 0.2857142857142857,
+          "hybrid_score": 0.509436183316367
+        },
+        {
+          "chunk_id": 3,
+          "source": "test.pdf",
+          "page": 2,
+          "semantic_score": 0.5637931823730469,
+          "keyword_score": 0.2857142857142857,
+          "hybrid_score": 0.4803695133754185
+        },
+        {
+          "chunk_id": 10,
+          "source": "test.pdf",
+          "page": 5,
+          "semantic_score": 0.4809921383857727,
+          "keyword_score": 0.2857142857142857,
+          "hybrid_score": 0.42240878258432657
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 8,
+      "question": "What is the project's critical-zone problem?",
+      "answerable": true,
+      "expected_pages": [
+        5
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 10,
+          "source": "test.pdf",
+          "page": 5,
+          "semantic_score": 0.54253089427948,
+          "keyword_score": 0.5,
+          "hybrid_score": 0.529771625995636
+        },
+        {
+          "chunk_id": 2,
+          "source": "test.pdf",
+          "page": 1,
+          "semantic_score": 0.5109453201293945,
+          "keyword_score": 0.5,
+          "hybrid_score": 0.5076617240905762
+        },
+        {
+          "chunk_id": 9,
+          "source": "test.pdf",
+          "page": 5,
+          "semantic_score": 0.49257153272628784,
+          "keyword_score": 0.5,
+          "hybrid_score": 0.49480007290840144
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 9,
+      "question": "Who is the Prime Minister of India?",
+      "answerable": false,
+      "expected_pages": [],
+      "retrieved": [
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "semantic_score": 0.2960430383682251,
+          "keyword_score": 0.42857142857142855,
+          "hybrid_score": 0.3358015554291861
+        },
+        {
+          "chunk_id": 2,
+          "source": "test.pdf",
+          "page": 1,
+          "semantic_score": 0.28201013803482056,
+          "keyword_score": 0.42857142857142855,
+          "hybrid_score": 0.32597852519580295
+        },
+        {
+          "chunk_id": 9,
+          "source": "test.pdf",
+          "page": 5,
+          "semantic_score": 0.2802353501319885,
+          "keyword_score": 0.42857142857142855,
+          "hybrid_score": 0.3247361736638205
+        }
+      ],
+      "recall_at_1": false,
+      "recall_at_3": false
+    },
+    {
+      "id": 10,
+      "question": "What is the population of India?",
+      "answerable": false,
+      "expected_pages": [],
+      "retrieved": [
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "semantic_score": 0.32427850365638733,
+          "keyword_score": 0.6666666666666666,
+          "hybrid_score": 0.42699495255947106
+        },
+        {
+          "chunk_id": 9,
+          "source": "test.pdf",
+          "page": 5,
+          "semantic_score": 0.3276309370994568,
+          "keyword_score": 0.5,
+          "hybrid_score": 0.3793416559696197
+        },
+        {
+          "chunk_id": 8,
+          "source": "test.pdf",
+          "page": 5,
+          "semantic_score": 0.3221859335899353,
+          "keyword_score": 0.5,
+          "hybrid_score": 0.3755301535129547
+        }
+      ],
+      "recall_at_1": false,
+      "recall_at_3": false
+    }
+  ]
+}
