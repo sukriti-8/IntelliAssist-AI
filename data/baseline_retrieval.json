@@ -1,0 +1,334 @@
+{
+  "total_questions": 10,
+  "answerable_questions": 8,
+  "recall_at_1": 0.875,
+  "recall_at_3": 0.875,
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is the main problem addressed by the aviation analytics project?",
+      "answerable": true,
+      "expected_pages": [
+        1
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 0,
+          "source": "test.pdf",
+          "page": 1,
+          "score": 0.5447820425033569,
+          "text": "AI- POWERED A VIATION ANALYTICS\n\nPROJECT OVERVIEW:\n\nImagine you are running an airline. Jet engines are incredibly expensive, and if an engine\n\nbreaks during a flight, it is a safety catastrophe.\n\nCurrently, airlines either wait for something to break (which is dangerous and costly) or they\n\nreplace parts on a rigid calendar schedule even if those parts are still perfectly healthy (which\n\nis highly wasteful).\n\nOur project builds an AI brain that acts like a smart health monitor for jet engines. By reading\n\ncontinuous live data from 21 different sensors inside the engine-like temperature, pressure, and\n\nspeed the AI predicts exactly how many more flights  that specific engine can safely make\n\nbefore it absolutely needs to be serviced.\n\nPROBLEM STATEMENT:\n\nIn both commercial and military aviation, unplanned jet engine failures incur extreme\n\neconomic penalties and compromise human safety.  Unscheduled \"Aircraft-on-Ground\" (AOG)"
+        },
+        {
+          "chunk_id": 2,
+          "source": "test.pdf",
+          "page": 1,
+          "score": 0.5379197597503662,
+          "text": "ry data is challenging.  The core engineering problem\n\nis: How can we utilize multi-sensor time-series telemetry streams to accurately track real-time\n\nengine degradation, identify the exact transition point from healthy operation to active wear,\n\nand forecast the precise number of remaining safe flight cycles (Remaining Useful Life - RUL)\n\nbefore a critical failure occurs?"
+        },
+        {
+          "chunk_id": 8,
+          "source": "test.pdf",
+          "page": 5,
+          "score": 0.5297342538833618,
+          "text": "CHALLENGES:\n\n1. Sensor Static & Noise: Real-world sensors jump up and down with random static. If\n\nwe feed this \"dirty\" data to the AI, its predictions will be wildly inaccurate. We must\n\nwrite code to smooth out these curves (using rolling averages).\n\n2. Useless \"Flatline\" Sensors : Out of the 21 sensors, about 10 of them record flat,\n\nconstant lines because of the sea -level simulation. We must automatically detect and\n\ndiscard these flatline sensors so they do not confuse the AI. [flatline sensors: a\n\nmeasuring device is outputting a constant, unch anging signal instead of a fluctuating\n\nwave or data curve]\n\n3. Safety Asymmetry (The Core Challenge): Standard AI treats all mistakes the same.\n\nBut in aviation, guessing an engine has 10 flights left when it actually has 100\n\n(underestimation) is perfectly safe—the engine is just serviced slightly early. Guessing\n\nit has 100 flights left when it only has 10 (overestimation) is a catastrophe. We have to"
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 2,
+      "question": "What are the costs associated with an unscheduled Aircraft-on-Ground event?",
+      "answerable": true,
+      "expected_pages": [
+        1
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 1,
+          "source": "test.pdf",
+          "page": 1,
+          "score": 0.6854063272476196,
+          "text": "ilitary aviation, unplanned jet engine failures incur extreme\n\neconomic penalties and compromise human safety.  Unscheduled \"Aircraft-on-Ground\" (AOG)\n\nevents cost airlines between 10,000 and 150,000 USD per hour in direct opera tional\n\ndisruptions, passenger compensation, and emergency logistical rerouting. Traditional\n\nmaintenance paradigms rely on either reactive maintenance (waiting for a component to fail)\n\nor preventive maintenance (replacing parts on rigid, clock -hour intervals regardless of their\n\nactual physical condition), both of which are highly inefficient and costly.\n\nWhile modern aircraft turbofan engines are embedded with thermodynamic and aerodynamic\n\nsensors (monitoring temperatures, pressures, and rotational speeds) , interpreting this high -\n\nfrequency, noisy, and non-linear telemetry data is challenging.  The core engineering problem\n\nis: How can we utilize multi-sensor time-series telemetry streams to accurately track real-time"
+        },
+        {
+          "chunk_id": 0,
+          "source": "test.pdf",
+          "page": 1,
+          "score": 0.5318136215209961,
+          "text": "AI- POWERED A VIATION ANALYTICS\n\nPROJECT OVERVIEW:\n\nImagine you are running an airline. Jet engines are incredibly expensive, and if an engine\n\nbreaks during a flight, it is a safety catastrophe.\n\nCurrently, airlines either wait for something to break (which is dangerous and costly) or they\n\nreplace parts on a rigid calendar schedule even if those parts are still perfectly healthy (which\n\nis highly wasteful).\n\nOur project builds an AI brain that acts like a smart health monitor for jet engines. By reading\n\ncontinuous live data from 21 different sensors inside the engine-like temperature, pressure, and\n\nspeed the AI predicts exactly how many more flights  that specific engine can safely make\n\nbefore it absolutely needs to be serviced.\n\nPROBLEM STATEMENT:\n\nIn both commercial and military aviation, unplanned jet engine failures incur extreme\n\neconomic penalties and compromise human safety.  Unscheduled \"Aircraft-on-Ground\" (AOG)"
+        },
+        {
+          "chunk_id": 9,
+          "source": "test.pdf",
+          "page": 5,
+          "score": 0.4635881185531616,
+          "text": "y safe—the engine is just serviced slightly early. Guessing\n\nit has 100 flights left when it only has 10 (overestimation) is a catastrophe. We have to\n\nprogram a custom \"safety -first\" loss function so the AI always errs on the side of\n\ncaution.\n\nGAPS in Existing Work:\n\n1. Gap 1: Absence of Uncertainty Quantification : Most standard models just guess a\n\nsingle number (e.g., \"The engine has 35 flights left\"). They do not state how confident\n\nthey are. Real-world airlines cannot risk scheduling maintenance on a guess. We plan\n\nto address this by introducing a confidence interval to our predictions.\n\n2. Gap 2: The \"Critical Zone\" Accuracy Drop: Existing AI models are highly accurate\n\nwhen the engine is healthy, but their accuracy drops significantly when the engine\n\nenters its final 30 flights (the \"Critical Zone\")—which is exactly when accuracy matters\n\nmost. We will optimize our training data specifically to improve critical-zone reliability."
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 3,
+      "question": "What dataset is used in the project?",
+      "answerable": true,
+      "expected_pages": [
+        4
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "score": 0.5729809999465942,
+          "text": "SUMMARY:\n\n1. Get the Engine Data (The Input): We use a famous dataset created by NASA (called the\n\nC-MAPSS dataset). This data contains sensor readings from 100 different jet engines\n\nthat were flown continuously until they finally wore out and failed.\n\n2. Clean Up the Noise : Raw sensors are \"noisy\" and full of static, just like a bad radio\n\nsignal. We write a Python script to smooth out the jumps in the data and filter out the\n\nsensors that aren't actually useful.\n\n3. Train the AI (The Model): We show the AI the last 30 flights' worth of sensor patterns.\n\nThe AI learns to recognize what a \"healthy, brand -new engine\" looks like versus a\n\n\"tired, degrading engine\" that is getting close to failing.\n\n4. Safety-First Rules (The Output):  We program the AI to follow a strict aviation safety\n\nrule: it is totally fine to underestimate an engine's life and service it slightly early, but\n\nit is absolutely unacceptable to overestimate its life and risk an in-flight breakdown.\n\nTOOLS:"
+        },
+        {
+          "chunk_id": 11,
+          "source": "test.pdf",
+          "page": 6,
+          "score": 0.5402763485908508,
+          "text": "Plan of action:\n\n1. Weeks 1–3: Data Setup & Preprocessing\n\n• Load NASA’s C-MAPSS FD001 dataset.\n\n• Clean the dataset, drop the flatline sensors, and normalize the data so all sensors are on\n\nthe same scale.\n\n2. Weeks 4–6: Exploratory Analysis (EDA)\n\n• Plot the dynamic sensors (like total temperature at High -Pressure Compressor outlet,\n\n𝑇30).\n\n• Visually map the exact point where an engine stops behaving normally and begins to\n\nactively degrade.\n\n3.  Weeks 7–9: AI Model Training\n\n• Train a baseline Random Forest model to classify if an engine is close to failing.\n\n• Train a sequential LSTM neural network to read 30 -flight sliding windows of sensor\n\ndata and output a continuous prediction of the remaining flights (Remaining Useful\n\nLife).\n\n4. Weeks 10–12: Evaluation & University Presentation\n\n• Test our models using NASA’s asymmetric scoring function to penalize dangerous late\n\nguesses.\n\n• Convert the outputs into our Green/Yellow/Red dispatch matrix."
+        },
+        {
+          "chunk_id": 3,
+          "source": "test.pdf",
+          "page": 2,
+          "score": 0.5332082509994507,
+          "text": "OBJECTIVES:\n\n• Perform a Comprehensive Review: Review existing prognostics and health\n\nmanagement (PHM) methods, contrasting traditional physics -based degradation\n\nmodels with modern data-driven machine learning models\n\n• Design a Data Preprocessing Pipeline: Clean and normalize multivariate sensor data\n\nfrom the NASA C -MAPSS dataset, eliminating constant-value (flatline) sensors  and\n\napplying temporal smoothing (e.g., rolling averages) to mitigate high-frequency sensor\n\nnoise.\n\n• Formulate a Realistic Degradation Target: Implement a Piecewise Linear RUL target\n\nfunction to prevent early-life over-optimistic training:\n\nRUL(t) = min (RULmax, Tfail -t)\n\n(Where, RULmax is the capped healthy phase threshold Tfail is the cycle of failure, and t is the\n\ncurrent operational flight cycle)\n\n• Develop and Compare Predictive Models: Construct and evaluate machine learning\n\narchitectures, specifically comparing a tree-based ensemble approach (Random Forest"
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 4,
+      "question": "What is the piecewise linear RUL target function?",
+      "answerable": true,
+      "expected_pages": [
+        2
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 3,
+          "source": "test.pdf",
+          "page": 2,
+          "score": 0.5208063125610352,
+          "text": "OBJECTIVES:\n\n• Perform a Comprehensive Review: Review existing prognostics and health\n\nmanagement (PHM) methods, contrasting traditional physics -based degradation\n\nmodels with modern data-driven machine learning models\n\n• Design a Data Preprocessing Pipeline: Clean and normalize multivariate sensor data\n\nfrom the NASA C -MAPSS dataset, eliminating constant-value (flatline) sensors  and\n\napplying temporal smoothing (e.g., rolling averages) to mitigate high-frequency sensor\n\nnoise.\n\n• Formulate a Realistic Degradation Target: Implement a Piecewise Linear RUL target\n\nfunction to prevent early-life over-optimistic training:\n\nRUL(t) = min (RULmax, Tfail -t)\n\n(Where, RULmax is the capped healthy phase threshold Tfail is the cycle of failure, and t is the\n\ncurrent operational flight cycle)\n\n• Develop and Compare Predictive Models: Construct and evaluate machine learning\n\narchitectures, specifically comparing a tree-based ensemble approach (Random Forest"
+        },
+        {
+          "chunk_id": 2,
+          "source": "test.pdf",
+          "page": 1,
+          "score": 0.49659380316734314,
+          "text": "ry data is challenging.  The core engineering problem\n\nis: How can we utilize multi-sensor time-series telemetry streams to accurately track real-time\n\nengine degradation, identify the exact transition point from healthy operation to active wear,\n\nand forecast the precise number of remaining safe flight cycles (Remaining Useful Life - RUL)\n\nbefore a critical failure occurs?"
+        },
+        {
+          "chunk_id": 5,
+          "source": "test.pdf",
+          "page": 3,
+          "score": 0.42341893911361694,
+          "text": "OUTCOMES:\n\n• End-to-End Pipeline Architecture (The Technical Output): A fully functional modular\n\npipeline in Python utilizing standard data-science libraries (numpy, pandas, scikit-learn,\n\nand keras/pytorch for LSTMs) to ingest, clean, normalize, train, and test models using\n\nNASA C-MAPSS FD001.\n\n• Benchmarked Diagnostic Metrics : A comparative analysis of model's predictive\n\naccuracy against established baselines, demonstrating a target Root Mean Squared\n\nError (RMSE) of under 15 cycles on test datasets\n\n• Three-Tier Early-Warning Decision Matrix (The Practical Framework):  A rule-based\n\nalert system integrated with the model output to support real -world maintenance\n\ndispatchers:\n\n1. Healthy Range (>80 cycles remaining): Normal operations\n\ncontinue.\n\n2. Warning Range (30-80 cycles remaining): Schedule scheduled\n\nmaintenance at the next base.\n\n3. Critical Range (<30 cycles remaining): Ground the aircraft\n\nimmediately for emergency turbine servicing"
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 5,
+      "question": "What sensors are mentioned in the project overview?",
+      "answerable": true,
+      "expected_pages": [
+        1
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 11,
+          "source": "test.pdf",
+          "page": 6,
+          "score": 0.5128402709960938,
+          "text": "Plan of action:\n\n1. Weeks 1–3: Data Setup & Preprocessing\n\n• Load NASA’s C-MAPSS FD001 dataset.\n\n• Clean the dataset, drop the flatline sensors, and normalize the data so all sensors are on\n\nthe same scale.\n\n2. Weeks 4–6: Exploratory Analysis (EDA)\n\n• Plot the dynamic sensors (like total temperature at High -Pressure Compressor outlet,\n\n𝑇30).\n\n• Visually map the exact point where an engine stops behaving normally and begins to\n\nactively degrade.\n\n3.  Weeks 7–9: AI Model Training\n\n• Train a baseline Random Forest model to classify if an engine is close to failing.\n\n• Train a sequential LSTM neural network to read 30 -flight sliding windows of sensor\n\ndata and output a continuous prediction of the remaining flights (Remaining Useful\n\nLife).\n\n4. Weeks 10–12: Evaluation & University Presentation\n\n• Test our models using NASA’s asymmetric scoring function to penalize dangerous late\n\nguesses.\n\n• Convert the outputs into our Green/Yellow/Red dispatch matrix."
+        },
+        {
+          "chunk_id": 3,
+          "source": "test.pdf",
+          "page": 2,
+          "score": 0.5101831555366516,
+          "text": "OBJECTIVES:\n\n• Perform a Comprehensive Review: Review existing prognostics and health\n\nmanagement (PHM) methods, contrasting traditional physics -based degradation\n\nmodels with modern data-driven machine learning models\n\n• Design a Data Preprocessing Pipeline: Clean and normalize multivariate sensor data\n\nfrom the NASA C -MAPSS dataset, eliminating constant-value (flatline) sensors  and\n\napplying temporal smoothing (e.g., rolling averages) to mitigate high-frequency sensor\n\nnoise.\n\n• Formulate a Realistic Degradation Target: Implement a Piecewise Linear RUL target\n\nfunction to prevent early-life over-optimistic training:\n\nRUL(t) = min (RULmax, Tfail -t)\n\n(Where, RULmax is the capped healthy phase threshold Tfail is the cycle of failure, and t is the\n\ncurrent operational flight cycle)\n\n• Develop and Compare Predictive Models: Construct and evaluate machine learning\n\narchitectures, specifically comparing a tree-based ensemble approach (Random Forest"
+        },
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "score": 0.5036884546279907,
+          "text": "SUMMARY:\n\n1. Get the Engine Data (The Input): We use a famous dataset created by NASA (called the\n\nC-MAPSS dataset). This data contains sensor readings from 100 different jet engines\n\nthat were flown continuously until they finally wore out and failed.\n\n2. Clean Up the Noise : Raw sensors are \"noisy\" and full of static, just like a bad radio\n\nsignal. We write a Python script to smooth out the jumps in the data and filter out the\n\nsensors that aren't actually useful.\n\n3. Train the AI (The Model): We show the AI the last 30 flights' worth of sensor patterns.\n\nThe AI learns to recognize what a \"healthy, brand -new engine\" looks like versus a\n\n\"tired, degrading engine\" that is getting close to failing.\n\n4. Safety-First Rules (The Output):  We program the AI to follow a strict aviation safety\n\nrule: it is totally fine to underestimate an engine's life and service it slightly early, but\n\nit is absolutely unacceptable to overestimate its life and risk an in-flight breakdown.\n\nTOOLS:"
+        }
+      ],
+      "recall_at_1": false,
+      "recall_at_3": false
+    },
+    {
+      "id": 6,
+      "question": "What preprocessing techniques are proposed for the sensor data?",
+      "answerable": true,
+      "expected_pages": [
+        2
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 3,
+          "source": "test.pdf",
+          "page": 2,
+          "score": 0.5549153089523315,
+          "text": "OBJECTIVES:\n\n• Perform a Comprehensive Review: Review existing prognostics and health\n\nmanagement (PHM) methods, contrasting traditional physics -based degradation\n\nmodels with modern data-driven machine learning models\n\n• Design a Data Preprocessing Pipeline: Clean and normalize multivariate sensor data\n\nfrom the NASA C -MAPSS dataset, eliminating constant-value (flatline) sensors  and\n\napplying temporal smoothing (e.g., rolling averages) to mitigate high-frequency sensor\n\nnoise.\n\n• Formulate a Realistic Degradation Target: Implement a Piecewise Linear RUL target\n\nfunction to prevent early-life over-optimistic training:\n\nRUL(t) = min (RULmax, Tfail -t)\n\n(Where, RULmax is the capped healthy phase threshold Tfail is the cycle of failure, and t is the\n\ncurrent operational flight cycle)\n\n• Develop and Compare Predictive Models: Construct and evaluate machine learning\n\narchitectures, specifically comparing a tree-based ensemble approach (Random Forest"
+        },
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "score": 0.5376161336898804,
+          "text": "SUMMARY:\n\n1. Get the Engine Data (The Input): We use a famous dataset created by NASA (called the\n\nC-MAPSS dataset). This data contains sensor readings from 100 different jet engines\n\nthat were flown continuously until they finally wore out and failed.\n\n2. Clean Up the Noise : Raw sensors are \"noisy\" and full of static, just like a bad radio\n\nsignal. We write a Python script to smooth out the jumps in the data and filter out the\n\nsensors that aren't actually useful.\n\n3. Train the AI (The Model): We show the AI the last 30 flights' worth of sensor patterns.\n\nThe AI learns to recognize what a \"healthy, brand -new engine\" looks like versus a\n\n\"tired, degrading engine\" that is getting close to failing.\n\n4. Safety-First Rules (The Output):  We program the AI to follow a strict aviation safety\n\nrule: it is totally fine to underestimate an engine's life and service it slightly early, but\n\nit is absolutely unacceptable to overestimate its life and risk an in-flight breakdown.\n\nTOOLS:"
+        },
+        {
+          "chunk_id": 2,
+          "source": "test.pdf",
+          "page": 1,
+          "score": 0.513300895690918,
+          "text": "ry data is challenging.  The core engineering problem\n\nis: How can we utilize multi-sensor time-series telemetry streams to accurately track real-time\n\nengine degradation, identify the exact transition point from healthy operation to active wear,\n\nand forecast the precise number of remaining safe flight cycles (Remaining Useful Life - RUL)\n\nbefore a critical failure occurs?"
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 7,
+      "question": "Which machine-learning approaches are being compared?",
+      "answerable": true,
+      "expected_pages": [
+        2
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 4,
+          "source": "test.pdf",
+          "page": 2,
+          "score": 0.6053169965744019,
+          "text": "ompare Predictive Models: Construct and evaluate machine learning\n\narchitectures, specifically comparing a tree-based ensemble approach (Random Forest\n\nClassifier for binary failure prediction within N cycles)  with recurrent deep learning\n\narchitectures (Long Short -Term Memory networks (LSTMs) for multi -sensor time -\n\nseries regression)"
+        },
+        {
+          "chunk_id": 3,
+          "source": "test.pdf",
+          "page": 2,
+          "score": 0.5637931823730469,
+          "text": "OBJECTIVES:\n\n• Perform a Comprehensive Review: Review existing prognostics and health\n\nmanagement (PHM) methods, contrasting traditional physics -based degradation\n\nmodels with modern data-driven machine learning models\n\n• Design a Data Preprocessing Pipeline: Clean and normalize multivariate sensor data\n\nfrom the NASA C -MAPSS dataset, eliminating constant-value (flatline) sensors  and\n\napplying temporal smoothing (e.g., rolling averages) to mitigate high-frequency sensor\n\nnoise.\n\n• Formulate a Realistic Degradation Target: Implement a Piecewise Linear RUL target\n\nfunction to prevent early-life over-optimistic training:\n\nRUL(t) = min (RULmax, Tfail -t)\n\n(Where, RULmax is the capped healthy phase threshold Tfail is the cycle of failure, and t is the\n\ncurrent operational flight cycle)\n\n• Develop and Compare Predictive Models: Construct and evaluate machine learning\n\narchitectures, specifically comparing a tree-based ensemble approach (Random Forest"
+        },
+        {
+          "chunk_id": 8,
+          "source": "test.pdf",
+          "page": 5,
+          "score": 0.49217820167541504,
+          "text": "CHALLENGES:\n\n1. Sensor Static & Noise: Real-world sensors jump up and down with random static. If\n\nwe feed this \"dirty\" data to the AI, its predictions will be wildly inaccurate. We must\n\nwrite code to smooth out these curves (using rolling averages).\n\n2. Useless \"Flatline\" Sensors : Out of the 21 sensors, about 10 of them record flat,\n\nconstant lines because of the sea -level simulation. We must automatically detect and\n\ndiscard these flatline sensors so they do not confuse the AI. [flatline sensors: a\n\nmeasuring device is outputting a constant, unch anging signal instead of a fluctuating\n\nwave or data curve]\n\n3. Safety Asymmetry (The Core Challenge): Standard AI treats all mistakes the same.\n\nBut in aviation, guessing an engine has 10 flights left when it actually has 100\n\n(underestimation) is perfectly safe—the engine is just serviced slightly early. Guessing\n\nit has 100 flights left when it only has 10 (overestimation) is a catastrophe. We have to"
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 8,
+      "question": "What is the project's critical-zone problem?",
+      "answerable": true,
+      "expected_pages": [
+        5
+      ],
+      "retrieved": [
+        {
+          "chunk_id": 10,
+          "source": "test.pdf",
+          "page": 5,
+          "score": 0.54253089427948,
+          "text": "e \"Critical Zone\")—which is exactly when accuracy matters\n\nmost. We will optimize our training data specifically to improve critical-zone reliability.\n\n3. Gap 3: Bridging the \"Human-Machine\" Gap: Most research papers focus purely on\n\nmathematical scores. They do not design how a real -world human (a mechanic in a\n\nhangar) will use the AI. We bridge this by creating a simple 3 -tier warning alert\n\nframework."
+        },
+        {
+          "chunk_id": 2,
+          "source": "test.pdf",
+          "page": 1,
+          "score": 0.510945200920105,
+          "text": "ry data is challenging.  The core engineering problem\n\nis: How can we utilize multi-sensor time-series telemetry streams to accurately track real-time\n\nengine degradation, identify the exact transition point from healthy operation to active wear,\n\nand forecast the precise number of remaining safe flight cycles (Remaining Useful Life - RUL)\n\nbefore a critical failure occurs?"
+        },
+        {
+          "chunk_id": 9,
+          "source": "test.pdf",
+          "page": 5,
+          "score": 0.49257147312164307,
+          "text": "y safe—the engine is just serviced slightly early. Guessing\n\nit has 100 flights left when it only has 10 (overestimation) is a catastrophe. We have to\n\nprogram a custom \"safety -first\" loss function so the AI always errs on the side of\n\ncaution.\n\nGAPS in Existing Work:\n\n1. Gap 1: Absence of Uncertainty Quantification : Most standard models just guess a\n\nsingle number (e.g., \"The engine has 35 flights left\"). They do not state how confident\n\nthey are. Real-world airlines cannot risk scheduling maintenance on a guess. We plan\n\nto address this by introducing a confidence interval to our predictions.\n\n2. Gap 2: The \"Critical Zone\" Accuracy Drop: Existing AI models are highly accurate\n\nwhen the engine is healthy, but their accuracy drops significantly when the engine\n\nenters its final 30 flights (the \"Critical Zone\")—which is exactly when accuracy matters\n\nmost. We will optimize our training data specifically to improve critical-zone reliability."
+        }
+      ],
+      "recall_at_1": true,
+      "recall_at_3": true
+    },
+    {
+      "id": 9,
+      "question": "Who is the Prime Minister of India?",
+      "answerable": false,
+      "expected_pages": [],
+      "retrieved": [
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "score": 0.2960429787635803,
+          "text": "SUMMARY:\n\n1. Get the Engine Data (The Input): We use a famous dataset created by NASA (called the\n\nC-MAPSS dataset). This data contains sensor readings from 100 different jet engines\n\nthat were flown continuously until they finally wore out and failed.\n\n2. Clean Up the Noise : Raw sensors are \"noisy\" and full of static, just like a bad radio\n\nsignal. We write a Python script to smooth out the jumps in the data and filter out the\n\nsensors that aren't actually useful.\n\n3. Train the AI (The Model): We show the AI the last 30 flights' worth of sensor patterns.\n\nThe AI learns to recognize what a \"healthy, brand -new engine\" looks like versus a\n\n\"tired, degrading engine\" that is getting close to failing.\n\n4. Safety-First Rules (The Output):  We program the AI to follow a strict aviation safety\n\nrule: it is totally fine to underestimate an engine's life and service it slightly early, but\n\nit is absolutely unacceptable to overestimate its life and risk an in-flight breakdown.\n\nTOOLS:"
+        },
+        {
+          "chunk_id": 0,
+          "source": "test.pdf",
+          "page": 1,
+          "score": 0.2887410819530487,
+          "text": "AI- POWERED A VIATION ANALYTICS\n\nPROJECT OVERVIEW:\n\nImagine you are running an airline. Jet engines are incredibly expensive, and if an engine\n\nbreaks during a flight, it is a safety catastrophe.\n\nCurrently, airlines either wait for something to break (which is dangerous and costly) or they\n\nreplace parts on a rigid calendar schedule even if those parts are still perfectly healthy (which\n\nis highly wasteful).\n\nOur project builds an AI brain that acts like a smart health monitor for jet engines. By reading\n\ncontinuous live data from 21 different sensors inside the engine-like temperature, pressure, and\n\nspeed the AI predicts exactly how many more flights  that specific engine can safely make\n\nbefore it absolutely needs to be serviced.\n\nPROBLEM STATEMENT:\n\nIn both commercial and military aviation, unplanned jet engine failures incur extreme\n\neconomic penalties and compromise human safety.  Unscheduled \"Aircraft-on-Ground\" (AOG)"
+        },
+        {
+          "chunk_id": 2,
+          "source": "test.pdf",
+          "page": 1,
+          "score": 0.2820100784301758,
+          "text": "ry data is challenging.  The core engineering problem\n\nis: How can we utilize multi-sensor time-series telemetry streams to accurately track real-time\n\nengine degradation, identify the exact transition point from healthy operation to active wear,\n\nand forecast the precise number of remaining safe flight cycles (Remaining Useful Life - RUL)\n\nbefore a critical failure occurs?"
+        }
+      ],
+      "recall_at_1": false,
+      "recall_at_3": false
+    },
+    {
+      "id": 10,
+      "question": "What is the population of India?",
+      "answerable": false,
+      "expected_pages": [],
+      "retrieved": [
+        {
+          "chunk_id": 9,
+          "source": "test.pdf",
+          "page": 5,
+          "score": 0.3276309669017792,
+          "text": "y safe—the engine is just serviced slightly early. Guessing\n\nit has 100 flights left when it only has 10 (overestimation) is a catastrophe. We have to\n\nprogram a custom \"safety -first\" loss function so the AI always errs on the side of\n\ncaution.\n\nGAPS in Existing Work:\n\n1. Gap 1: Absence of Uncertainty Quantification : Most standard models just guess a\n\nsingle number (e.g., \"The engine has 35 flights left\"). They do not state how confident\n\nthey are. Real-world airlines cannot risk scheduling maintenance on a guess. We plan\n\nto address this by introducing a confidence interval to our predictions.\n\n2. Gap 2: The \"Critical Zone\" Accuracy Drop: Existing AI models are highly accurate\n\nwhen the engine is healthy, but their accuracy drops significantly when the engine\n\nenters its final 30 flights (the \"Critical Zone\")—which is exactly when accuracy matters\n\nmost. We will optimize our training data specifically to improve critical-zone reliability."
+        },
+        {
+          "chunk_id": 6,
+          "source": "test.pdf",
+          "page": 4,
+          "score": 0.3242785632610321,
+          "text": "SUMMARY:\n\n1. Get the Engine Data (The Input): We use a famous dataset created by NASA (called the\n\nC-MAPSS dataset). This data contains sensor readings from 100 different jet engines\n\nthat were flown continuously until they finally wore out and failed.\n\n2. Clean Up the Noise : Raw sensors are \"noisy\" and full of static, just like a bad radio\n\nsignal. We write a Python script to smooth out the jumps in the data and filter out the\n\nsensors that aren't actually useful.\n\n3. Train the AI (The Model): We show the AI the last 30 flights' worth of sensor patterns.\n\nThe AI learns to recognize what a \"healthy, brand -new engine\" looks like versus a\n\n\"tired, degrading engine\" that is getting close to failing.\n\n4. Safety-First Rules (The Output):  We program the AI to follow a strict aviation safety\n\nrule: it is totally fine to underestimate an engine's life and service it slightly early, but\n\nit is absolutely unacceptable to overestimate its life and risk an in-flight breakdown.\n\nTOOLS:"
+        },
+        {
+          "chunk_id": 8,
+          "source": "test.pdf",
+          "page": 5,
+          "score": 0.3221859633922577,
+          "text": "CHALLENGES:\n\n1. Sensor Static & Noise: Real-world sensors jump up and down with random static. If\n\nwe feed this \"dirty\" data to the AI, its predictions will be wildly inaccurate. We must\n\nwrite code to smooth out these curves (using rolling averages).\n\n2. Useless \"Flatline\" Sensors : Out of the 21 sensors, about 10 of them record flat,\n\nconstant lines because of the sea -level simulation. We must automatically detect and\n\ndiscard these flatline sensors so they do not confuse the AI. [flatline sensors: a\n\nmeasuring device is outputting a constant, unch anging signal instead of a fluctuating\n\nwave or data curve]\n\n3. Safety Asymmetry (The Core Challenge): Standard AI treats all mistakes the same.\n\nBut in aviation, guessing an engine has 10 flights left when it actually has 100\n\n(underestimation) is perfectly safe—the engine is just serviced slightly early. Guessing\n\nit has 100 flights left when it only has 10 (overestimation) is a catastrophe. We have to"
+        }
+      ],
+      "recall_at_1": false,
+      "recall_at_3": false
+    }
+  ]
+}

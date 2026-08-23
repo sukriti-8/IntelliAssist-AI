@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "What is the main problem addressed by the aviation analytics project?",
+    "answerable": true,
+    "expected_pages": [1]
+  },
+  {
+    "id": 2,
+    "question": "What are the costs associated with an unscheduled Aircraft-on-Ground event?",
+    "answerable": true,
+    "expected_pages": [1]
+  },
+  {
+    "id": 3,
+    "question": "What dataset is used in the project?",
+    "answerable": true,
+    "expected_pages": [4]
+  },
+  {
+    "id": 4,
+    "question": "What is the piecewise linear RUL target function?",
+    "answerable": true,
+    "expected_pages": [2]
+  },
+  {
+    "id": 5,
+    "question": "What sensors are mentioned in the project overview?",
+    "answerable": true,
+    "expected_pages": [1]
+  },
+  {
+    "id": 6,
+    "question": "What preprocessing techniques are proposed for the sensor data?",
+    "answerable": true,
+    "expected_pages": [2]
+  },
+  {
+    "id": 7,
+    "question": "Which machine-learning approaches are being compared?",
+    "answerable": true,
+    "expected_pages": [2]
+  },
+  {
+    "id": 8,
+    "question": "What is the project's critical-zone problem?",
+    "answerable": true,
+    "expected_pages": [5]
+  },
+  {
+    "id": 9,
+    "question": "Who is the Prime Minister of India?",
+    "answerable": false,
+    "expected_pages": []
+  },
+  {
+    "id": 10,
+    "question": "What is the population of India?",
+    "answerable": false,
+    "expected_pages": []
+  }
+]
