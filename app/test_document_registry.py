@@ -22,6 +22,7 @@ def main():
         filename="aviation.pdf",
         file_hash="FILE_HASH_123",
         content_hash="CONTENT_HASH_ABC",
+        owner_id="user_001",
     )
 
     print("\nRegistered document:")

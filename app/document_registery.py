@@ -69,10 +69,22 @@ def register_document(
     filename: str,
     file_hash: str,
     content_hash: str,
+    owner_id: str,
+    access: str = "private",
+    shared_with: Optional[List[str]] = None,
 ) -> Dict:
     """
-    Add a new document to the registry with a unique document ID.
+    Register a new document with ownership and access settings.
     """
+
+    if not owner_id.strip():
+        raise ValueError("owner_id cannot be empty.")
+
+    if access not in {"private", "shared"}:
+        raise ValueError("access must be 'private' or 'shared'.")
+
+    if shared_with is None:
+        shared_with = []
 
     registry = load_registry()
 
@@ -81,6 +93,9 @@ def register_document(
         "filename": filename,
         "file_hash": file_hash,
         "content_hash": content_hash,
+        "owner_id": owner_id,
+        "access": access,
+        "shared_with": shared_with,
     }
 
     registry.append(document)
