@@ -1,15 +1,11 @@
 import json
+import uuid
 from pathlib import Path
 from typing import Dict, List, Optional
 
-
 REGISTRY_PATH = Path("data/document_registry.json")
 
-
-# ---------------------------------------------------------
 # Load registry
-# ---------------------------------------------------------
-
 def load_registry() -> List[Dict]:
     """
     Load previously registered documents.
@@ -23,11 +19,7 @@ def load_registry() -> List[Dict]:
     with REGISTRY_PATH.open("r", encoding="utf-8") as file:
         return json.load(file)
 
-
-# ---------------------------------------------------------
 # Save registry
-# ---------------------------------------------------------
-
 def save_registry(registry: List[Dict]) -> None:
     """
     Save the document registry to disk.
@@ -39,10 +31,7 @@ def save_registry(registry: List[Dict]) -> None:
         json.dump(registry, file, indent=2)
 
 
-# ---------------------------------------------------------
 # Find duplicate
-# ---------------------------------------------------------
-
 def find_duplicate(
     file_hash: str,
     content_hash: str,
@@ -75,22 +64,20 @@ def find_duplicate(
     return None
 
 
-# ---------------------------------------------------------
 # Register document
-# ---------------------------------------------------------
-
 def register_document(
     filename: str,
     file_hash: str,
     content_hash: str,
 ) -> Dict:
     """
-    Add a document to the registry.
+    Add a new document to the registry with a unique document ID.
     """
 
     registry = load_registry()
 
     document = {
+        "document_id": f"doc_{uuid.uuid4().hex[:12]}",
         "filename": filename,
         "file_hash": file_hash,
         "content_hash": content_hash,
