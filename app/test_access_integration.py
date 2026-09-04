@@ -20,10 +20,7 @@ def main():
     print("\nRegistered document:")
     print(document)
 
-    # ---------------------------------------------------------
     # Test owner
-    # ---------------------------------------------------------
-
     owner_access = can_access_document(
         document,
         "user_001",
@@ -32,10 +29,8 @@ def main():
     print(f"\nOwner access: {owner_access}")
     assert owner_access is True
 
-    # ---------------------------------------------------------
+    
     # Test shared user
-    # ---------------------------------------------------------
-
     shared_user_access = can_access_document(
         document,
         "user_002",
@@ -44,10 +39,8 @@ def main():
     print(f"Shared user access: {shared_user_access}")
     assert shared_user_access is True
 
-    # ---------------------------------------------------------
+    
     # Test unrelated user
-    # ---------------------------------------------------------
-
     unrelated_user_access = can_access_document(
         document,
         "user_003",

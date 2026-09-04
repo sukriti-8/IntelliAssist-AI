@@ -22,10 +22,7 @@ def main():
         "shared_with": ["user_002"],
     }
 
-    # ---------------------------------------------------------
     # Private document
-    # ---------------------------------------------------------
-
     owner_private = can_access_document(
         private_document,
         "user_001",
@@ -43,10 +40,7 @@ def main():
     assert owner_private is True
     assert other_private is False
 
-    # ---------------------------------------------------------
     # Shared document
-    # ---------------------------------------------------------
-
     owner_shared = can_access_document(
         shared_document,
         "user_001",
@@ -71,10 +65,7 @@ def main():
     assert shared_user is True
     assert unrelated_user is False
 
-    # ---------------------------------------------------------
     # Empty user ID
-    # ---------------------------------------------------------
-
     empty_user = can_access_document(
         private_document,
         "",
