@@ -6,7 +6,7 @@ from typing import List, Dict
 # ---------------------------------------------------------
 
 HIGH_THRESHOLD = 0.70
-MEDIUM_THRESHOLD = 0.30
+MEDIUM_THRESHOLD = 0.10
 
 
 # ---------------------------------------------------------
