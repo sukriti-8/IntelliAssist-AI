@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "document_id": "doc_008a64b859d6",
+    "filename": "test.pdf",
+    "file_hash": "9643909599334ec0f0666dab0544021d760caf0b5d952fcadc7dac52c65427d2",
+    "content_hash": "e8193b0878973215178865685e43c1d5eb1be5843de3df70582fd72100778df0",
+    "owner_id": "user_001",
+    "access": "private",
+    "shared_with": []
+  }
+]
