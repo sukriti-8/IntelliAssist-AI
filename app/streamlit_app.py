@@ -4,7 +4,8 @@ from pathlib import Path
 import numpy as np
 import streamlit as st
 from sentence_transformers import SentenceTransformer
-
+from sentence_transformers import CrossEncoder
+from app.confidence import assess_evidence
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,6 +26,8 @@ from app.vector_store import (
     build_index,
     save_index,
     save_metadata,
+    load_index,
+    load_metadata,
 )
 
 
@@ -71,10 +74,8 @@ if uploaded_file is not None:
     st.success(f"Uploaded: {safe_filename}")
 
     try:
-        # --------------------------------------------------
-        # 1. PDF EXTRACTION
-        # --------------------------------------------------
-
+        
+        # 1. PDF EXTRACTION     
         pages = load_pdf(str(file_path))
 
         full_text = "\n".join(
@@ -87,10 +88,8 @@ if uploaded_file is not None:
             f"and {len(full_text)} characters."
         )
 
-        # --------------------------------------------------
-        # 2. DUPLICATE DETECTION
-        # --------------------------------------------------
-
+        
+        # 2. DUPLICATE DETECTION       
         file_hash = calculate_file_hash(
             str(file_path)
         )
@@ -131,10 +130,7 @@ if uploaded_file is not None:
 
         else:
 
-            # --------------------------------------------------
-            # 3. REGISTER DOCUMENT
-            # --------------------------------------------------
-
+            # 3. REGISTER DOCUMENT         
             document = register_document(
                 filename=safe_filename,
                 file_hash=file_hash,
@@ -151,10 +147,8 @@ if uploaded_file is not None:
                 f"{document['document_id']}"
             )
 
-            # --------------------------------------------------
-            # 4. CHUNKING
-            # --------------------------------------------------
-
+           
+            # 4. CHUNKING           
             with st.spinner(
                 "Creating document chunks..."
             ):
@@ -165,10 +159,8 @@ if uploaded_file is not None:
                 f"Created {len(chunks)} document chunks."
             )
 
-            # --------------------------------------------------
+            
             # 5. BGE-M3 EMBEDDINGS
-            # --------------------------------------------------
-
             with st.spinner(
                 "Generating BGE-M3 embeddings..."
             ):
@@ -200,10 +192,8 @@ if uploaded_file is not None:
                 f"{embeddings.shape[1]}"
             )
 
-            # --------------------------------------------------
+            
             # 6. BUILD FAISS INDEX
-            # --------------------------------------------------
-
             with st.spinner(
                 "Building FAISS vector index..."
             ):
@@ -236,13 +226,184 @@ st.divider()
 
 st.header("Ask Your Document")
 
-question = st.text_input(
-    "Enter your question:"
+question = st.chat_input(
+    "Ask another question about your document..."
 )
 
 if question:
 
-    st.info(
-        "Question answering will be connected "
-        "to FAISS retrieval next."
-    )
+    try:
+   
+        # 1. LOAD SAVED FAISS DATA
+        index = load_index()
+        chunks = load_metadata()
+
+
+        # 2. LOAD MODELS 
+        embedding_model = load_embedding_model()
+
+        reranker = CrossEncoder(
+            "BAAI/bge-reranker-v2-m3"
+        )
+
+  
+        # 3. CREATE QUERY EMBEDDING
+        query_embedding = embedding_model.encode(
+            [question],
+            normalize_embeddings=True,
+        )
+
+        query_embedding = np.asarray(
+            query_embedding,
+            dtype="float32",
+        )
+
+
+        # 4. FAISS CANDIDATE RETRIEVAL
+        candidate_k = min(10, index.ntotal)
+
+        scores, indices = index.search(
+            query_embedding,
+            candidate_k,
+        )
+
+        candidates = []
+
+        for score, index_position in zip(
+            scores[0],
+            indices[0],
+        ):
+
+            if index_position < 0:
+                continue
+
+            chunk = chunks[index_position].copy()
+
+            chunk["semantic_score"] = float(score)
+
+            candidates.append(chunk)
+
+  
+        # 5. RERANK CANDIDATES
+        pairs = [
+            [question, candidate["text"]]
+            for candidate in candidates
+        ]
+
+        reranker_scores = reranker.predict(pairs)
+
+        reranked_results = []
+
+        for candidate, score in zip(
+            candidates,
+            reranker_scores,
+        ):
+
+            result = candidate.copy()
+
+            result["reranker_score"] = float(score)
+
+            reranked_results.append(result)
+
+        reranked_results.sort(
+            key=lambda item: item["reranker_score"],
+            reverse=True,
+        )
+
+       
+        # 6. EVIDENCE ASSESSMENT   
+        evidence_results = reranked_results[:3]
+
+        assessment = assess_evidence(
+            evidence_results
+        )
+
+        st.subheader("Evidence Assessment")
+
+        st.write(
+            f"Confidence: "
+            f"{assessment['confidence']:.4f}"
+        )
+
+        st.write(
+            f"Level: {assessment['level']}"
+        )
+
+        st.write(
+            f"Decision: {assessment['decision']}"
+        )
+
+  
+        # 7. DISPLAY RETRIEVED EVIDENCE
+        st.subheader("Retrieved Evidence")
+
+        for rank, result in enumerate(
+            evidence_results,
+            start=1,
+        ):
+
+            st.write(
+                f"**Result {rank}**"
+            )
+
+            st.write(
+                f"Page: {result['page_number']} | "
+                f"Chunk: {result['chunk_id']} | "
+                f"Reranker score: "
+                f"{result['reranker_score']:.4f}"
+            )
+
+            st.write(result["text"])
+
+            st.divider()
+
+   
+        # 8. ANSWER ONLY WHEN EVIDENCE EXISTS   
+        if assessment["decision"] == "INSUFFICIENT_EVIDENCE":
+
+            st.warning(
+                "I could not find enough information "
+                "in the provided document to answer this question."
+            )
+
+        else:
+
+            context_parts = []
+
+            for result in evidence_results:
+
+                context_parts.append(
+                    f"[Page {result['page_number']}]\n"
+                    f"{result['text']}"
+                )
+
+            context = "\n\n".join(context_parts)
+
+            from app.rag import generate_answer
+
+            with st.spinner(
+                "Generating document-grounded answer..."
+            ):
+
+                answer = generate_answer(
+                    query=question,
+                    context=context,
+                )
+
+            st.subheader("Answer")
+
+            st.write(answer)
+
+    except FileNotFoundError:
+
+        st.warning(
+            "No processed document is available. "
+            "Upload and process a document first."
+        )
+
+    except Exception as error:
+
+        st.error(
+            f"Error during question answering: {error}"
+        )
+

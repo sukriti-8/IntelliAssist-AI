@@ -1,18 +1,14 @@
 from typing import List, Dict
 
 
-# ---------------------------------------------------------
-# Confidence thresholds
-# ---------------------------------------------------------
 
+# Confidence thresholds
 HIGH_THRESHOLD = 0.70
 MEDIUM_THRESHOLD = 0.10
 
 
-# ---------------------------------------------------------
-# Calculate evidence confidence
-# ---------------------------------------------------------
 
+# Calculate evidence confidence
 def calculate_confidence(results: List[Dict]) -> float:
     """
     Calculate confidence from reranked retrieval results.
@@ -35,10 +31,8 @@ def calculate_confidence(results: List[Dict]) -> float:
     return confidence
 
 
-# ---------------------------------------------------------
-# Classify confidence
-# ---------------------------------------------------------
 
+# Classify confidence
 def classify_confidence(confidence: float) -> str:
     """
     Convert numeric confidence into a human-readable level.
@@ -53,10 +47,7 @@ def classify_confidence(confidence: float) -> str:
     return "LOW"
 
 
-# ---------------------------------------------------------
 # Complete confidence decision
-# ---------------------------------------------------------
-
 def assess_evidence(results: List[Dict]) -> Dict:
     """
     Assess whether retrieved evidence is strong enough

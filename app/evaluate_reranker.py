@@ -77,10 +77,7 @@ for index, item in enumerate(evaluation_questions, start=1):
     print(f"Expected pages: {expected_pages}")
 
 
-    # =====================================================
     # Semantic retrieval
-    # =====================================================
-
     # Retrieve a larger candidate pool before reranking.
     # This allows the reranker to choose the best result
     # from more candidates.
@@ -95,10 +92,8 @@ for index, item in enumerate(evaluation_questions, start=1):
     )
 
 
-    # =====================================================
+  
     # Rerank semantic candidates
-    # =====================================================
-
     pairs = [
         [question, candidate["text"]]
         for candidate in candidates
@@ -107,10 +102,8 @@ for index, item in enumerate(evaluation_questions, start=1):
     reranker_scores = reranker.predict(pairs)
 
 
-    # =====================================================
+    
     # Attach reranker scores
-    # =====================================================
-
     reranked_results = []
 
     for candidate, score in zip(
@@ -125,20 +118,15 @@ for index, item in enumerate(evaluation_questions, start=1):
         reranked_results.append(result)
 
 
-    # =====================================================
     # Sort by reranker score
-    # =====================================================
-
     reranked_results.sort(
         key=lambda item: item["reranker_score"],
         reverse=True
     )
 
 
-    # =====================================================
+   
     # Recall evaluation
-    # =====================================================
-
     if expected_answerable:
 
         answerable_questions += 1
@@ -177,10 +165,8 @@ for index, item in enumerate(evaluation_questions, start=1):
         print("Unanswerable question")
 
 
-    # =====================================================
+    
     # Display top reranked results
-    # =====================================================
-
     print("\nTop reranked results:")
 
     for rank, result in enumerate(
@@ -196,11 +182,7 @@ for index, item in enumerate(evaluation_questions, start=1):
             f"chunk={result['chunk_id']}"
         )
 
-
-# =========================================================
 # 6. Final metrics
-# =========================================================
-
 print("\n" + "=" * 80)
 print("RERANKER RETRIEVAL METRICS")
 
