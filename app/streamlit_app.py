@@ -10,7 +10,7 @@ import streamlit as st
 from sentence_transformers import SentenceTransformer, CrossEncoder
 
 from app.confidence import assess_evidence
-
+from app.access_control import can_access_document
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 if str(PROJECT_ROOT) not in sys.path:
@@ -680,14 +680,32 @@ question = st.chat_input(
 if question:
     try:
         # Use the currently selected documents.
-        documents = st.session_state.get(
+        selected_documents = st.session_state.get(
             "selected_documents",
             [],
         )
 
-        if not documents:
+        if not selected_documents:
             st.warning(
                 "Select at least one processed document before asking a question."
+            )
+            st.stop()
+
+        # SECURITY: enforce document access before retrieval.
+        current_user_id = "user_001"
+
+        documents = [
+            document
+            for document in selected_documents
+            if can_access_document(
+                document,
+                current_user_id,
+            )
+        ]
+
+        if not documents:
+            st.error(
+                "You do not have access to the selected documents."
             )
             st.stop()
 
