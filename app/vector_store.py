@@ -1,55 +1,131 @@
 from pathlib import Path
 from typing import List, Dict
 import json
+
 import faiss
 import numpy as np
 
+
 STORAGE_DIR = Path("storage/faiss")
-INDEX_PATH = STORAGE_DIR / "index.faiss"
-METADATA_PATH = STORAGE_DIR / "metadata.json"
-
-def save_metadata(chunks: List[Dict]) -> None:
-    """Save chunk metadata using FAISS vector position as the list index."""
-
-    STORAGE_DIR.mkdir(parents=True, exist_ok=True)
-
-    with open(METADATA_PATH, "w", encoding="utf-8") as file:
-        json.dump(chunks, file, ensure_ascii=False, indent=2)
 
 
-def load_metadata() -> List[Dict]:
-    """Load chunk metadata from disk."""
+def get_document_storage_dir(document_id: str) -> Path:
+    if not document_id.strip():
+        raise ValueError("document_id cannot be empty.")
 
-    if not METADATA_PATH.exists():
-        raise FileNotFoundError(f"Metadata not found: {METADATA_PATH}")
+    return STORAGE_DIR / document_id
 
-    with open(METADATA_PATH, "r", encoding="utf-8") as file:
+
+def get_index_path(document_id: str) -> Path:
+    return get_document_storage_dir(document_id) / "index.faiss"
+
+
+def get_metadata_path(document_id: str) -> Path:
+    return get_document_storage_dir(document_id) / "metadata.json"
+
+
+def save_metadata(
+    chunks: List[Dict],
+    document_id: str,
+) -> None:
+
+    storage_dir = get_document_storage_dir(document_id)
+    storage_dir.mkdir(parents=True, exist_ok=True)
+
+    metadata_path = get_metadata_path(document_id)
+
+    with open(
+        metadata_path,
+        "w",
+        encoding="utf-8",
+    ) as file:
+
+        json.dump(
+            chunks,
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+
+def load_metadata(
+    document_id: str,
+) -> List[Dict]:
+
+    metadata_path = get_metadata_path(document_id)
+
+    if not metadata_path.exists():
+        raise FileNotFoundError(
+            f"Metadata not found for document: {document_id}"
+        )
+
+    with open(
+        metadata_path,
+        "r",
+        encoding="utf-8",
+    ) as file:
+
         return json.load(file)
-def build_index(embeddings: np.ndarray) -> faiss.Index:
-    """Build a FAISS index using inner-product similarity."""
+
+
+def build_index(
+    embeddings: np.ndarray,
+) -> faiss.Index:
 
     if embeddings.ndim != 2:
-        raise ValueError("Embeddings must be a 2D array.")
+        raise ValueError(
+            "Embeddings must be a 2D array."
+        )
 
     dimension = embeddings.shape[1]
 
     index = faiss.IndexFlatIP(dimension)
-    index.add(embeddings.astype("float32"))
+
+    index.add(
+        embeddings.astype("float32")
+    )
 
     return index
 
 
-def save_index(index: faiss.Index) -> None:
-    """Save a FAISS index to disk."""
+def save_index(
+    index: faiss.Index,
+    document_id: str,
+) -> None:
 
-    STORAGE_DIR.mkdir(parents=True, exist_ok=True)
-    faiss.write_index(index, str(INDEX_PATH))
+    storage_dir = get_document_storage_dir(document_id)
+    storage_dir.mkdir(parents=True, exist_ok=True)
+
+    index_path = get_index_path(document_id)
+
+    faiss.write_index(
+        index,
+        str(index_path),
+    )
 
 
-def load_index() -> faiss.Index:
-    """Load a previously saved FAISS index."""
+def load_index(
+    document_id: str,
+) -> faiss.Index:
 
-    if not INDEX_PATH.exists():
-        raise FileNotFoundError(f"FAISS index not found: {INDEX_PATH}")
+    index_path = get_index_path(document_id)
 
-    return faiss.read_index(str(INDEX_PATH))
+    if not index_path.exists():
+        raise FileNotFoundError(
+            f"FAISS index not found for document: {document_id}"
+        )
+
+    return faiss.read_index(
+        str(index_path)
+    )
+
+
+def document_index_exists(
+    document_id: str,
+) -> bool:
+
+    return (
+        get_index_path(document_id).exists()
+        and
+        get_metadata_path(document_id).exists()
+    )

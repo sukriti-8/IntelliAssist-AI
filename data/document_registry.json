@@ -1,9 +1,18 @@
 [
   {
-    "document_id": "doc_880137493416",
+    "document_id": "doc_dc685726329a",
     "filename": "test.pdf",
     "file_hash": "9643909599334ec0f0666dab0544021d760caf0b5d952fcadc7dac52c65427d2",
     "content_hash": "e8193b0878973215178865685e43c1d5eb1be5843de3df70582fd72100778df0",
+    "owner_id": "user_001",
+    "access": "private",
+    "shared_with": []
+  },
+  {
+    "document_id": "doc_28b49e89f3f0",
+    "filename": "CSP_technical_terms.pdf",
+    "file_hash": "d92ea6b5df6337e333155d778245dad0aebf8e158f0bd5eadbf5a20b02105add",
+    "content_hash": "8d61fb41f6d10b5d059439f5188da84e936917bb07957024ed5909137c70518c",
     "owner_id": "user_001",
     "access": "private",
     "shared_with": []
