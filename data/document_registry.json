@@ -18,5 +18,25 @@
     "access": "private",
     "shared_with": [],
     "storage_filename": "doc_6b88d486efdf.pdf"
+  },
+  {
+    "document_id": "doc_efb88b441e30",
+    "filename": "SIP report.docx",
+    "file_hash": "ea32a0f48638167dfebc721ba1bc5dd4bacef1c4e2cac62a0d3e73b6a92fbfcc",
+    "content_hash": "8d3362d66c706a9b3984b6af768bddc184a6c59471a8ef9ab8c2688f461dcf86",
+    "owner_id": "user_001",
+    "access": "private",
+    "shared_with": [],
+    "storage_filename": "doc_efb88b441e30.docx"
+  },
+  {
+    "document_id": "doc_39f20d36d281",
+    "filename": "readme.txt",
+    "file_hash": "4f5270554b775c67e73aff383c5436fd329d6e4cc3d3a116913276fae511269b",
+    "content_hash": "01e83c9b10ab9eeb6a63de55936d7ccd3ade9da8844ce7abb41ce78a4b1edaf3",
+    "owner_id": "user_001",
+    "access": "private",
+    "shared_with": [],
+    "storage_filename": "doc_39f20d36d281.txt"
   }
 ]

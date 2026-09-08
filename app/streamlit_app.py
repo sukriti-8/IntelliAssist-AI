@@ -16,7 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.ingestion.pdf_loader import load_pdf
+from app.ingestion.document_loader import load_document
 from app.ingestion.chunker import chunk_pages
 from app.duplicate_detector import (
     calculate_file_hash,
@@ -388,14 +388,28 @@ current_workspace = find_workspace(
 )
 
 uploaded_files = st.file_uploader(
-    "Upload PDF documents",
-    type=["pdf"],
+    "Upload documents",
+    type=["pdf", "txt", "docx"],
     accept_multiple_files=True,
-    help="You can upload multiple PDF documents into the selected workspace.",
+    help=(
+        "Upload PDF, TXT, or DOCX documents into the selected workspace."
+    ),
 )
 
 if uploaded_files:
     for uploaded_file in uploaded_files:
+
+        # SECURITY: reject excessively large uploads.
+        MAX_FILE_SIZE_MB = 25
+        MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+
+        if uploaded_file.size > MAX_FILE_SIZE_BYTES:
+            st.error(
+                f"{uploaded_file.name} is too large. "
+                f"Maximum allowed size is {MAX_FILE_SIZE_MB} MB."
+            )
+            continue
+
         signature = uploaded_file_signature(uploaded_file)
 
         if signature in st.session_state["processed_uploads"]:
@@ -405,7 +419,8 @@ if uploaded_files:
         upload_dir.mkdir(parents=True, exist_ok=True)
 
         safe_filename = Path(uploaded_file.name).name
-        temp_path = upload_dir / f".incoming_{signature}.pdf"
+        file_extension = Path(safe_filename).suffix.lower()
+        temp_path = upload_dir / f".incoming_{signature}{file_extension}"
 
         try:
             # Store the upload temporarily under a unique name.
@@ -413,8 +428,8 @@ if uploaded_files:
             with temp_path.open("wb") as file:
                 file.write(uploaded_file.getbuffer())
 
-            # 1. PDF EXTRACTION
-            pages = load_pdf(str(temp_path))
+            # 1. DOCUMENT EXTRACTION
+            pages = load_document(str(temp_path))
 
             full_text = "\n".join(
                 page["text"]
@@ -422,7 +437,7 @@ if uploaded_files:
             )
 
             st.info(
-                f"{safe_filename}: extracted {len(pages)} pages "
+                f"{safe_filename}: extracted {len(pages)} sections "
                 f"and {len(full_text)} characters."
             )
 
@@ -475,7 +490,9 @@ if uploaded_files:
                 )
 
                 # Use a server-generated storage filename.
-                storage_filename = f"{document['document_id']}.pdf"
+                storage_filename = (
+                    f"{document['document_id']}{file_extension}"
+                )
                 final_path = upload_dir / storage_filename
                 temp_path.replace(final_path)
 
@@ -792,14 +809,14 @@ if question:
             reverse=True,
         )
 
-        # 5. EVIDENCE ASSESSMENT   
-        evidence_results = reranked_results[:3]
+                # 5. EVIDENCE ASSESSMENT
+        evidence_results = reranked_results[:6]
 
         assessment = assess_evidence(
             evidence_results
         )
 
-        # 6. GENERATE ANSWER 
+        # 6. BUILD EXPANDED CONTEXT FOR ANSWER GENERATION
         if assessment["decision"] == "INSUFFICIENT_EVIDENCE":
             answer = (
                 "I could not find enough reliable evidence in the "
@@ -807,18 +824,124 @@ if question:
             )
 
         else:
+            from app.rag import (
+                generate_answer,
+                is_summary_request,
+            )
+
+            # Summary/brief questions need more surrounding context
+            # because the relevant section may span several chunks.
+            if is_summary_request(question):
+                context_radius = 2
+            else:
+                context_radius = 1
+
+            expanded_context = []
+
+            # Keep track of chunks already added so overlapping
+            # context windows do not duplicate text.
+            added_chunks = set()
+
+            # Expand around the strongest retrieved evidence.
+            for result in evidence_results:
+
+                document_id = result["document_id"]
+
+                document_chunks = load_metadata(
+                    document_id
+                )
+
+                # The FAISS index position identifies the original
+                # chunk inside this document.
+                center_index = result.get(
+                    "chunk_index"
+                )
+
+                # Older metadata may not contain chunk_index.
+                # In that case, use the chunk position stored during
+                # retrieval when available.
+                if center_index is None:
+                    center_index = result.get(
+                        "_chunk_index"
+                    )
+
+                if center_index is None:
+                    continue
+
+                start_index = max(
+                    0,
+                    center_index - context_radius,
+                )
+
+                end_index = min(
+                    len(document_chunks),
+                    center_index + context_radius + 1,
+                )
+
+                for chunk_position in range(
+                    start_index,
+                    end_index,
+                ):
+                    chunk_key = (
+                        document_id,
+                        chunk_position,
+                    )
+
+                    if chunk_key in added_chunks:
+                        continue
+
+                    added_chunks.add(chunk_key)
+
+                    chunk = document_chunks[
+                        chunk_position
+                    ]
+
+                    expanded_context.append(
+                        {
+                            "document_id": document_id,
+                            "filename": result["filename"],
+                            "chunk_index": chunk_position,
+                            "page_number": chunk.get(
+                                "page_number",
+                                "N/A",
+                            ),
+                            "text": chunk["text"],
+                        }
+                    )
+
+            # If chunk positions are unavailable for any reason,
+            # fall back to the reranked evidence itself.
+            if not expanded_context:
+                expanded_context = [
+                    {
+                        "document_id": result["document_id"],
+                        "filename": result["filename"],
+                        "chunk_index": result.get(
+                            "_chunk_index",
+                            "N/A",
+                        ),
+                        "page_number": result.get(
+                            "page_number",
+                            "N/A",
+                        ),
+                        "text": result["text"],
+                    }
+                    for result in evidence_results
+                ]
+
             context_parts = []
 
-            for result in evidence_results:
+            for result in expanded_context:
                 context_parts.append(
                     f"[Document: {result['filename']} | "
-                    f"Page {result['page_number']}]\n"
+                    f"Page {result['page_number']} | "
+                    f"Chunk {result['chunk_index']}]\n"
                     f"{result['text']}"
                 )
 
-            context = "\n\n".join(context_parts)
-
-            from app.rag import generate_answer
+            context = "\n\n".join(
+                context_parts
+            )
 
             with st.spinner(
                 "Generating document-grounded answer..."
