@@ -9,12 +9,21 @@ from pathlib import Path
 import numpy as np
 import streamlit as st
 from sentence_transformers import SentenceTransformer, CrossEncoder
-
+from app.sentiment_intent import analyze_sentiment_intent
 from app.confidence import assess_evidence
 from app.access_control import can_access_document
-
+import os
+from dotenv import load_dotenv
+from google import genai
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(PROJECT_ROOT / ".env")
 
+api_key = os.getenv("GEMINI_API_KEY")
+
+if not api_key:
+    raise RuntimeError("GEMINI_API_KEY is not set.")
+
+client = genai.Client(api_key=api_key)
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -493,10 +502,7 @@ if st.session_state["user_profile"] is None:
     st.stop()
 
 
-# ============================================================
 # HEADER
-# ============================================================
-
 st.title("IntelliAssist AI")
 
 st.subheader(
@@ -512,19 +518,13 @@ st.write(
     "behind every answer when you need it."
 )
 
-# ============================================================
 # DOCUMENT UPLOAD
-# ============================================================
-
 st.divider()
 
 st.header("My Documents")
 
 
-# ============================================================
 # WORKSPACE SETUP
-# ============================================================
-
 workspace_registry = load_workspace_registry()
 
 if not workspace_registry:
@@ -672,10 +672,8 @@ if uploaded_files:
 
         try:
 
-            # ------------------------------------------------
-            # TEMPORARY STORAGE
-            # ------------------------------------------------
-
+           
+            # TEMPORARY STORAGE      
             # Never use the user's filename as the
             # physical storage path.
             with temp_path.open("wb") as file:
@@ -1850,3 +1848,89 @@ if st.session_state["chat_history"]:
             "PDF export requires ReportLab. "
             "Install it with: pip install reportlab"
         )
+# ============================================================
+# BUSINESS SENTIMENT + INTENT ANALYSIS
+# ============================================================
+
+if st.session_state.get("user_profile") == "Business":
+
+    st.divider()
+
+    st.header("Business Text Analysis")
+
+    st.write(
+        "Analyze customer or business text for sentiment and intent."
+    )
+
+    analysis_text = st.text_area(
+        "Enter text to analyze",
+        placeholder=(
+            "Example: I am disappointed with the service "
+            "and want my money refunded."
+        ),
+        height=140,
+    )
+
+    if st.button(
+        "Analyze Sentiment & Intent",
+        type="primary",
+    ):
+
+        if not analysis_text.strip():
+
+            st.warning(
+                "Please enter some text to analyze."
+            )
+
+        else:
+
+            try:
+
+                with st.spinner(
+                    "Analyzing text..."
+                ):
+
+                    result = analyze_sentiment_intent(
+                        analysis_text,
+                        client,
+                    )
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+
+                    st.metric(
+                        "Sentiment",
+                        result["sentiment"],
+                    )
+
+                    st.caption(
+                        f"Confidence: "
+                        f"{result['sentiment_confidence']:.2f}"
+                    )
+
+                with col2:
+
+                    st.metric(
+                        "Intent",
+                        result["intent"],
+                    )
+
+                    st.caption(
+                        f"Confidence: "
+                        f"{result['intent_confidence']:.2f}"
+                    )
+
+                st.write(
+                    f"**Reason:** {result['reason']}"
+                )
+
+            except Exception as error:
+
+                st.error(
+                    "Business analysis is temporarily unavailable."
+                )
+
+                st.caption(
+                    f"Technical detail: {error}"
+                )
