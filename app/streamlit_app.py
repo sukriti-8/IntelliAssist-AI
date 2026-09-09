@@ -9,7 +9,10 @@ from pathlib import Path
 import numpy as np
 import streamlit as st
 from sentence_transformers import SentenceTransformer, CrossEncoder
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 from app.confidence import assess_evidence
 from app.access_control import can_access_document
 from app.sentiment_intent import analyze_sentiment_intent
@@ -17,15 +20,14 @@ import os
 from dotenv import load_dotenv
 from google import genai
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 load_dotenv(PROJECT_ROOT / ".env")
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
     raise RuntimeError("GEMINI_API_KEY is not set.")
 client = genai.Client(api_key=api_key)
 
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+
 
 from app.ingestion.document_loader import load_document
 from app.ingestion.chunker import chunk_pages
