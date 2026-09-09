@@ -53,10 +53,8 @@ st.set_page_config(
 )
 
 
-# ============================================================
-# SESSION STATE
-# ============================================================
 
+# SESSION STATE
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = []
 
@@ -71,6 +69,8 @@ if "current_workspace_id" not in st.session_state:
 
 if "workspace_initialized" not in st.session_state:
     st.session_state["workspace_initialized"] = False
+if "user_profile" not in st.session_state:
+    st.session_state["user_profile"] = None
 
 
 # ============================================================
@@ -464,6 +464,36 @@ def render_chat_history():
 
 
 # ============================================================
+# PROFILE SELECTION
+# ============================================================
+
+if st.session_state["user_profile"] is None:
+
+    st.title("IntelliAssist AI")
+
+    st.subheader("Choose your profile")
+
+    st.write(
+        "Select how you plan to use IntelliAssist. "
+        "You can continue using the assistant after selecting your profile."
+    )
+
+    profile = st.radio(
+        "Profile",
+        options=["Student", "Business"],
+        horizontal=True,
+    )
+
+    if st.button("Continue", type="primary"):
+
+        st.session_state["user_profile"] = profile
+
+        st.rerun()
+
+    st.stop()
+
+
+# ============================================================
 # HEADER
 # ============================================================
 
@@ -473,11 +503,14 @@ st.subheader(
     "Smart Document AI Assistant"
 )
 
+st.caption(
+    f"Profile: {st.session_state['user_profile']}"
+)
+
 st.write(
     "Upload documents, ask questions across them, and inspect the evidence "
     "behind every answer when you need it."
 )
-
 
 # ============================================================
 # DOCUMENT UPLOAD
