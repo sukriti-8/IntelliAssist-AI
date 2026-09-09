@@ -9,21 +9,21 @@ from pathlib import Path
 import numpy as np
 import streamlit as st
 from sentence_transformers import SentenceTransformer, CrossEncoder
-from app.sentiment_intent import analyze_sentiment_intent
+
 from app.confidence import assess_evidence
 from app.access_control import can_access_document
+from app.sentiment_intent import analyze_sentiment_intent
 import os
 from dotenv import load_dotenv
 from google import genai
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(PROJECT_ROOT / ".env")
-
 api_key = os.getenv("GEMINI_API_KEY")
-
 if not api_key:
     raise RuntimeError("GEMINI_API_KEY is not set.")
-
 client = genai.Client(api_key=api_key)
+
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -59,11 +59,154 @@ st.set_page_config(
     page_title="IntelliAssist AI",
     page_icon="I",
     layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+# ============================================================
+# UI THEME
+# ============================================================
+
+st.markdown(
+    """
+    <style>
+    :root {
+        --ia-bg: #111211;
+        --ia-panel: #171817;
+        --ia-panel-2: #1c1d1c;
+        --ia-border: #353735;
+        --ia-text: #f1f1ee;
+        --ia-muted: #9b9d99;
+        --ia-accent: #2f8df6;
+        --ia-success: #19b94b;
+        --ia-warning: #7a3b00;
+    }
+    .stApp { background: var(--ia-bg); color: var(--ia-text); }
+    [data-testid="stHeader"] { background: rgba(17,18,17,0.92); }
+    [data-testid="stSidebar"] {
+        background: #151615;
+        border-right: 1px solid var(--ia-border);
+    }
+    [data-testid="stSidebar"] > div:first-child { padding-top: 1.1rem; }
+    .ia-brand {
+        font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em;
+        margin: 0 0 1rem 0; color: var(--ia-text);
+    }
+    .ia-sidebar-label {
+        color: var(--ia-muted); font-size: 0.74rem; text-transform: uppercase;
+        letter-spacing: 0.08em; margin: 1rem 0 0.35rem 0;
+    }
+    .ia-divider { height: 1px; background: var(--ia-border); margin: 0.7rem 0; }
+    .ia-topbar {
+        display:flex; align-items:center; justify-content:space-between;
+        margin-bottom: 1rem;
+    }
+    .ia-title { font-size: 1.12rem; font-weight: 700; }
+    .ia-folder {
+        border: 1px solid var(--ia-border); border-radius: 9px;
+        padding: 0.45rem 0.7rem; color: #c6c8c4; font-size: 0.85rem;
+        background: var(--ia-panel);
+    }
+    .ia-upload-note { color: var(--ia-muted); font-size: 0.78rem; margin-top: -0.45rem; }
+    .ia-doc-count { color: var(--ia-muted); font-size: 0.82rem; margin: 0.55rem 0; }
+    .ia-doc-row {
+        border-top: 1px solid var(--ia-border); padding: 0.55rem 0;
+    }
+    .ia-ready {
+        display:inline-block; background:#073c16; color:#28d455;
+        border-radius:999px; padding:0.14rem 0.52rem; font-size:0.72rem;
+    }
+    .ia-duplicate {
+        background:#4a2400; border:1px solid #6b3500; border-radius:9px;
+        padding:0.55rem 0.7rem; margin:0.45rem 0 0.8rem 0;
+    }
+    .ia-question-label, .ia-answer-label {
+        color: var(--ia-muted); font-size: 0.78rem; margin-top: 0.8rem;
+    }
+    .ia-question { font-weight: 650; font-size: 0.96rem; margin-top: 0.15rem; }
+    .ia-answer {
+        font-size: 0.94rem; line-height: 1.65; margin-top: 0.15rem;
+    }
+    div[data-testid="stChatInput"] {
+        background: transparent;
+    }
+    div[data-testid="stChatInput"] textarea {
+        background: #171817 !important; border: 1px solid var(--ia-border) !important;
+        color: var(--ia-text) !important; border-radius: 9px !important;
+    }
+    .stButton > button, .stDownloadButton > button { border-radius: 8px; }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 
+def render_sidebar(workspace_registry, current_workspace):
+    """Render folder/workspace navigation and lightweight recent chats."""
+    with st.sidebar:
+        st.markdown('<div class="ia-brand">IntelliAssist</div>', unsafe_allow_html=True)
+        st.markdown('<div class="ia-sidebar-label">Folders</div>', unsafe_allow_html=True)
 
+        for workspace in workspace_registry:
+            active = workspace["workspace_id"] == current_workspace["workspace_id"]
+            label = f"📁  {workspace['name']}"
+            if st.button(
+                label,
+                key=f"folder_{workspace['workspace_id']}",
+                use_container_width=True,
+                type="primary" if active else "secondary",
+            ):
+                if not active:
+                    st.session_state["current_workspace_id"] = workspace["workspace_id"]
+                    st.session_state["selected_documents"] = []
+                    st.session_state["chat_history"] = []
+                    st.rerun()
+
+        st.markdown('<div class="ia-divider"></div>', unsafe_allow_html=True)
+
+        if st.button("＋ New folder", key="new_folder", use_container_width=True):
+            st.session_state["show_new_folder"] = True
+
+        if st.session_state.get("show_new_folder"):
+            with st.form("new_folder_form", clear_on_submit=True):
+                folder_name = st.text_input("Folder name", placeholder="e.g. DBMS")
+                c1, c2 = st.columns(2)
+                create = c1.form_submit_button("Create", type="primary")
+                cancel = c2.form_submit_button("Cancel")
+                if cancel:
+                    st.session_state["show_new_folder"] = False
+                    st.rerun()
+                if create:
+                    if not folder_name.strip():
+                        st.warning("Enter a folder name.")
+                    else:
+                        create_workspace(
+                            name=folder_name.strip(),
+                            owner_id=current_profile_owner_id(),
+                            registry=workspace_registry,
+                        )
+                        st.session_state["show_new_folder"] = False
+                        st.session_state["current_workspace_id"] = load_workspace_registry()[-1]["workspace_id"]
+                        st.session_state["selected_documents"] = []
+                        st.rerun()
+
+        if st.session_state.get("chat_history"):
+            st.markdown('<div class="ia-sidebar-label">Recent questions</div>', unsafe_allow_html=True)
+            for index, item in enumerate(st.session_state["chat_history"][-5:][::-1], start=1):
+                question = item["question"].strip()
+                short = question if len(question) <= 34 else question[:31] + "..."
+                st.caption(f"💬 {short}")
+
+        st.markdown('<div class="ia-divider"></div>', unsafe_allow_html=True)
+        st.caption("Current folder")
+        st.caption(f"📁 {current_workspace['name']}")
+
+
+
+
+# ============================================================
 # SESSION STATE
+# ============================================================
+
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = []
 
@@ -80,6 +223,8 @@ if "workspace_initialized" not in st.session_state:
     st.session_state["workspace_initialized"] = False
 if "user_profile" not in st.session_state:
     st.session_state["user_profile"] = None
+if "duplicate_notice" not in st.session_state:
+    st.session_state["duplicate_notice"] = None
 
 
 # ============================================================
@@ -105,41 +250,105 @@ def uploaded_file_signature(uploaded_file):
     return hashlib.sha256(uploaded_file.getvalue()).hexdigest()
 
 
-def ensure_default_workspace():
-    """Create/select a General workspace and migrate legacy documents into it."""
+BASE_USER_ID = "user_001"
+PROFILE_OWNER_IDS = {
+    "Student": BASE_USER_ID,
+    "Business": f"{BASE_USER_ID}_business",
+}
+
+
+def current_profile_owner_id():
+    """Return the storage namespace used by the active profile."""
+    profile = st.session_state.get("user_profile")
+    return PROFILE_OWNER_IDS.get(profile, BASE_USER_ID)
+
+
+def workspace_belongs_to_profile(workspace, profile=None):
+    """Check whether a workspace belongs to the active profile."""
+    profile = profile or st.session_state.get("user_profile")
+    owner_id = PROFILE_OWNER_IDS.get(profile, BASE_USER_ID)
+    return workspace.get("owner_id") == owner_id
+
+
+def document_belongs_to_profile(document_id, profile=None, workspace_registry=None):
+    """Check whether a document is already attached to the profile namespace."""
+    workspace_registry = (
+        load_workspace_registry()
+        if workspace_registry is None
+        else workspace_registry
+    )
+
+    return any(
+        workspace_belongs_to_profile(workspace, profile)
+        and document_id in workspace.get("document_ids", [])
+        for workspace in workspace_registry
+    )
+
+
+def ensure_profile_workspace():
+    """Create/select a profile-specific General workspace.
+
+    Existing legacy workspaces/documents are treated as Student data so the
+    current Student setup is preserved. Business gets a separate namespace.
+    """
     workspace_registry = load_workspace_registry()
     document_registry = load_registry()
+    profile = st.session_state.get("user_profile", "Student")
+    owner_id = PROFILE_OWNER_IDS.get(profile, BASE_USER_ID)
 
-    if not workspace_registry:
+    profile_workspaces = [
+        workspace
+        for workspace in workspace_registry
+        if workspace.get("owner_id") == owner_id
+    ]
+
+    # Legacy workspaces were created with user_001, so they remain Student
+    # workspaces. Only Student receives the one-time legacy migration.
+    if profile == "Student" and not profile_workspaces:
+        legacy_workspaces = [
+            workspace
+            for workspace in workspace_registry
+            if workspace.get("owner_id") == BASE_USER_ID
+        ]
+        profile_workspaces = legacy_workspaces
+
+    if not profile_workspaces:
         workspace = create_workspace(
             name="General",
-            owner_id="user_001",
+            owner_id=owner_id,
             registry=workspace_registry,
         )
         workspace_registry = load_workspace_registry()
-    else:
-        workspace = workspace_registry[0]
+        profile_workspaces = [workspace]
 
-    # One-time compatibility migration:
-    # documents created before workspaces existed are placed in General.
-    referenced_document_ids = {
-        document_id
-        for item in workspace_registry
-        for document_id in item.get("document_ids", [])
-    }
+    workspace = next(
+        (
+            item
+            for item in profile_workspaces
+            if item.get("workspace_id") == st.session_state.get("current_workspace_id")
+        ),
+        profile_workspaces[0],
+    )
 
-    changed = False
+    # One-time compatibility migration for the existing Student setup:
+    # documents not referenced by any workspace are placed in Student General.
+    if profile == "Student":
+        referenced_document_ids = {
+            document_id
+            for item in workspace_registry
+            for document_id in item.get("document_ids", [])
+        }
 
-    for document in document_registry:
-        document_id = document.get("document_id")
+        changed = False
+        for document in document_registry:
+            document_id = document.get("document_id")
+            if document_id and document_id not in referenced_document_ids:
+                if document_id not in workspace["document_ids"]:
+                    workspace["document_ids"].append(document_id)
+                    changed = True
 
-        if document_id and document_id not in referenced_document_ids:
-            if document_id not in workspace["document_ids"]:
-                workspace["document_ids"].append(document_id)
-                changed = True
-
-    if changed:
-        save_workspace_registry(workspace_registry)
+        if changed:
+            save_workspace_registry(workspace_registry)
 
     return workspace
 
@@ -477,139 +686,61 @@ def render_chat_history():
 # ============================================================
 
 if st.session_state["user_profile"] is None:
-
     st.title("IntelliAssist AI")
-
     st.subheader("Choose your profile")
-
-    st.write(
-        "Select how you plan to use IntelliAssist. "
-        "You can continue using the assistant after selecting your profile."
-    )
-
-    profile = st.radio(
-        "Profile",
-        options=["Student", "Business"],
-        horizontal=True,
-    )
-
+    st.write("Select how you plan to use IntelliAssist.")
+    profile = st.radio("Profile", options=["Student", "Business"], horizontal=True)
     if st.button("Continue", type="primary"):
-
         st.session_state["user_profile"] = profile
-
         st.rerun()
-
     st.stop()
 
 
 # HEADER
-st.title("IntelliAssist AI")
-
-st.subheader(
-    "Smart Document AI Assistant"
-)
-
-st.caption(
-    f"Profile: {st.session_state['user_profile']}"
-)
-
-st.write(
-    "Upload documents, ask questions across them, and inspect the evidence "
-    "behind every answer when you need it."
-)
-
-# DOCUMENT UPLOAD
-st.divider()
-
-st.header("My Documents")
-
-
-# WORKSPACE SETUP
+workspace_registry = load_workspace_registry()
+current_workspace = ensure_profile_workspace()
 workspace_registry = load_workspace_registry()
 
-if not workspace_registry:
-
-    current_workspace = ensure_default_workspace()
-
-    workspace_registry = load_workspace_registry()
-
-else:
-
-    current_workspace = find_workspace(
-        workspace_id=st.session_state.get(
-            "current_workspace_id"
-        ),
-        registry=workspace_registry,
-    )
-
-    if current_workspace is None:
-        current_workspace = workspace_registry[0]
-
-
-st.session_state["current_workspace_id"] = (
-    current_workspace["workspace_id"]
-)
-
-
-workspace_names = [
-    item["name"]
-    for item in workspace_registry
+# Only show folders belonging to the active profile.
+workspace_registry = [
+    workspace
+    for workspace in workspace_registry
+    if workspace_belongs_to_profile(workspace)
 ]
 
-current_workspace_name = (
-    current_workspace["name"]
+if current_workspace["workspace_id"] not in {
+    workspace["workspace_id"] for workspace in workspace_registry
+}:
+    current_workspace = workspace_registry[0]
+
+current_workspace = find_workspace(
+    workspace_id=current_workspace["workspace_id"],
+    registry=workspace_registry,
+)
+st.session_state["current_workspace_id"] = current_workspace["workspace_id"]
+render_sidebar(workspace_registry, current_workspace)
+
+st.markdown(
+    f'<div class="ia-topbar"><div class="ia-title">IntelliAssist</div>'
+    f'<div class="ia-folder">📁 {current_workspace["name"]}</div></div>',
+    unsafe_allow_html=True,
 )
 
-
-selected_workspace_name = st.selectbox(
-    "Workspace",
-    options=workspace_names,
-    index=workspace_names.index(
-        current_workspace_name
-    ),
-    help=(
-        "Documents uploaded here will belong "
-        "to the selected workspace."
-    ),
-)
-
-
-if selected_workspace_name != current_workspace_name:
-
-    selected_workspace = next(
-        item
-        for item in workspace_registry
-        if item["name"] == selected_workspace_name
-    )
-
-    st.session_state["current_workspace_id"] = (
-        selected_workspace["workspace_id"]
-    )
-
-    st.session_state["selected_documents"] = []
-
-    st.rerun()
-
-
+# WORKSPACE SETUP
 current_workspace = find_workspace(
     workspace_id=st.session_state["current_workspace_id"],
     registry=load_workspace_registry(),
 )
 
-
+st.markdown("### Upload documents")
 uploaded_files = st.file_uploader(
-    "Upload documents",
-    type=[
-        "pdf",
-        "txt",
-        "docx",
-    ],
+    "Upload document",
+    type=["pdf", "txt", "docx"],
     accept_multiple_files=True,
-    help=(
-        "Upload PDF, TXT, or DOCX documents "
-        "into the selected workspace."
-    ),
+    label_visibility="collapsed",
+    help="Upload PDF, TXT, or DOCX documents into the selected folder.",
 )
+st.markdown('<div class="ia-upload-note">PDF, TXT or DOCX · up to 25MB</div>', unsafe_allow_html=True)
 
 
 if uploaded_files:
@@ -672,8 +803,10 @@ if uploaded_files:
 
         try:
 
-           
-            # TEMPORARY STORAGE      
+            # ------------------------------------------------
+            # TEMPORARY STORAGE
+            # ------------------------------------------------
+
             # Never use the user's filename as the
             # physical storage path.
             with temp_path.open("wb") as file:
@@ -723,6 +856,14 @@ if uploaded_files:
                 registry=registry,
             )
 
+            # Duplicate reuse is profile-scoped. A Student document must not
+            # automatically appear in or be reused by Business, and vice versa.
+            if duplicate and not document_belongs_to_profile(
+                duplicate["document"]["document_id"],
+                workspace_registry=load_workspace_registry(),
+            ):
+                duplicate = None
+
 
             if duplicate:
 
@@ -733,6 +874,8 @@ if uploaded_files:
                 existing_document_id = (
                     existing_document["document_id"]
                 )
+
+                st.session_state["duplicate_notice"] = existing_document["filename"]
 
                 st.warning(
                     "Duplicate document detected: "
@@ -771,6 +914,8 @@ if uploaded_files:
 
 
             else:
+
+                st.session_state["duplicate_notice"] = None
 
                 # ------------------------------------------------
                 # 3. REGISTER DOCUMENT
@@ -926,188 +1071,97 @@ if uploaded_files:
 # ============================================================
 # DOCUMENT EXPLORER
 # ============================================================
-
 registry = load_registry()
-
 workspace_registry = load_workspace_registry()
-
 current_workspace = find_workspace(
-    workspace_id=st.session_state[
-        "current_workspace_id"
-    ],
+    workspace_id=st.session_state["current_workspace_id"],
     registry=workspace_registry,
 )
 
-
 workspace_document_ids = set(
-    current_workspace.get(
-        "document_ids",
-        []
-    )
-    if current_workspace
-    else []
+    current_workspace.get("document_ids", []) if current_workspace else []
 )
-
 
 processed_documents = [
     document
     for document in registry
-    if document["document_id"]
-    in workspace_document_ids
-    and document_index_exists(
-        document["document_id"]
-    )
+    if document["document_id"] in workspace_document_ids
+    and document_index_exists(document["document_id"])
 ]
 
+selected_ids = set(
+    document.get("document_id")
+    for document in st.session_state.get("selected_documents", [])
+)
+
+valid_ids = {document["document_id"] for document in processed_documents}
+selected_ids &= valid_ids
+
+if not selected_ids and processed_documents:
+    selected_ids = valid_ids
 
 if processed_documents:
-
     st.markdown(
-        f"### {current_workspace['name']} · Documents"
+        f'<div class="ia-doc-count">{len(processed_documents)} document(s) · {len(selected_ids)} selected</div>',
+        unsafe_allow_html=True,
     )
-
-
-    # Use document IDs as the internal selection
-    # values so duplicate display filenames cannot collide.
-    document_labels = {
-        document["document_id"]:
-            document["filename"]
-        for document in processed_documents
-    }
-
-
-    valid_selected_ids = [
-        document["document_id"]
-        for document
-        in st.session_state[
-            "selected_documents"
-        ]
-        if document["document_id"]
-        in document_labels
-    ]
-
-
-    if not valid_selected_ids:
-
-        valid_selected_ids = list(
-            document_labels.keys()
-        )
-
-
-    selected_ids = st.multiselect(
-        "Documents to search",
-        options=list(
-            document_labels.keys()
-        ),
-        default=valid_selected_ids,
-        format_func=lambda document_id:
-            document_labels[document_id],
-        help=(
-            "Choose which documents in this "
-            "workspace IntelliAssist should search."
-        ),
-    )
-
-
-    selected_documents = [
-        document
-        for document in processed_documents
-        if document["document_id"]
-        in selected_ids
-    ]
-
-
-    st.session_state[
-        "selected_documents"
-    ] = selected_documents
-
-
-    st.caption(
-        f"{len(processed_documents)} document(s) "
-        f"in this workspace · "
-        f"{len(selected_documents)} selected for search"
-    )
-
 
     for document in processed_documents:
-
-        col1, col2, col3 = st.columns(
-            [5, 2, 1]
-        )
-
-        with col1:
-
-            st.write(
-                f"📄 **{document['filename']}**"
+        doc_id = document["document_id"]
+        c1, c2, c3 = st.columns([0.45, 7.4, 1.15])
+        with c1:
+            checked = st.checkbox(
+                "",
+                value=doc_id in selected_ids,
+                key=f"select_{doc_id}",
+                label_visibility="collapsed",
             )
-
-        with col2:
-
-            st.caption(
-                f"{document.get('access', 'private').capitalize()} · "
-                f"{document['document_id']}"
+        with c2:
+            st.markdown(
+                f'📄 <strong>{document["filename"]}</strong> &nbsp; <span class="ia-ready">Ready</span>',
+                unsafe_allow_html=True,
             )
-
-        with col3:
-
-            if st.button(
-                "Delete",
-                key=f"delete_{document['document_id']}",
-            ):
-
-                delete_document(
-                    document
-                )
-
-                remove_document_from_all_workspaces(
-                    document["document_id"]
-                )
-
-                st.session_state[
-                    "selected_documents"
-                ] = [
-                    item
-                    for item
-                    in st.session_state[
-                        "selected_documents"
-                    ]
-                    if item["document_id"]
-                    != document["document_id"]
+        with c3:
+            if st.button("🗑", key=f"delete_{doc_id}", help="Delete document"):
+                delete_document(document)
+                remove_document_from_all_workspaces(doc_id)
+                st.session_state["selected_documents"] = [
+                    item for item in st.session_state["selected_documents"]
+                    if item["document_id"] != doc_id
                 ]
-
-                st.success(
-                    f"Deleted {document['filename']}."
-                )
-
                 st.rerun()
+        if checked:
+            selected_ids.add(doc_id)
+        else:
+            selected_ids.discard(doc_id)
 
-
+    st.session_state["selected_documents"] = [
+        document for document in processed_documents
+        if document["document_id"] in selected_ids
+    ]
 else:
-
-    st.info(
-        f"No processed documents in "
-        f"{current_workspace['name']}. "
-        "Upload a PDF above to get started."
+    st.markdown(
+        '<div class="ia-doc-count">No documents in this folder yet.</div>',
+        unsafe_allow_html=True,
     )
 
+# Show a compact duplicate notice when the upload flow detects one.
+if st.session_state.get("duplicate_notice"):
+    duplicate_name = st.session_state["duplicate_notice"]
+    st.markdown(
+        f'<div class="ia-duplicate">📋 <strong>{duplicate_name}</strong> looks like a file you already have.</div>',
+        unsafe_allow_html=True,
+    )
 
 # ============================================================
 # CONVERSATION
 # ============================================================
 
-st.divider()
-
-st.header(
-    "💬 Ask Your Documents"
-)
-
 render_chat_history()
-
 
 question = st.chat_input(
     "Ask a question about your selected documents..."
 )
-
 
 # ============================================================
 # QUESTION ANSWERING
@@ -1817,120 +1871,45 @@ if question:
 # ============================================================
 
 if st.session_state["chat_history"]:
-
-    st.divider()
-
-    st.subheader(
-        "📄 Export Conversation"
-    )
-
-
-    try:
-
-        pdf_bytes = build_conversation_pdf(
-            st.session_state[
-                "chat_history"
-            ]
-        )
+    with st.expander("Export conversation", expanded=False):
+        try:
+            pdf_bytes = build_conversation_pdf(st.session_state["chat_history"])
+            st.download_button(
+                label="Download conversation as PDF",
+                data=pdf_bytes,
+                file_name="intelliassist_conversation.pdf",
+                mime="application/pdf",
+            )
+        except ImportError:
+            st.warning("PDF export requires ReportLab.")
 
 
-        st.download_button(
-            label="Download conversation as PDF",
-            data=pdf_bytes,
-            file_name="intelliassist_conversation.pdf",
-            mime="application/pdf",
-        )
-
-
-    except ImportError:
-
-        st.warning(
-            "PDF export requires ReportLab. "
-            "Install it with: pip install reportlab"
-        )
 # ============================================================
 # BUSINESS SENTIMENT + INTENT ANALYSIS
 # ============================================================
 
 if st.session_state.get("user_profile") == "Business":
-
-    st.divider()
-
-    st.header("Business Text Analysis")
-
-    st.write(
-        "Analyze customer or business text for sentiment and intent."
-    )
-
-    analysis_text = st.text_area(
-        "Enter text to analyze",
-        placeholder=(
-            "Example: I am disappointed with the service "
-            "and want my money refunded."
-        ),
-        height=140,
-    )
-
-    if st.button(
-        "Analyze Sentiment & Intent",
-        type="primary",
-    ):
-
-        if not analysis_text.strip():
-
-            st.warning(
-                "Please enter some text to analyze."
-            )
-
-        else:
-
-            try:
-
-                with st.spinner(
-                    "Analyzing text..."
-                ):
-
-                    result = analyze_sentiment_intent(
-                        analysis_text,
-                        client,
-                    )
-
-                col1, col2 = st.columns(2)
-
-                with col1:
-
-                    st.metric(
-                        "Sentiment",
-                        result["sentiment"],
-                    )
-
-                    st.caption(
-                        f"Confidence: "
-                        f"{result['sentiment_confidence']:.2f}"
-                    )
-
-                with col2:
-
-                    st.metric(
-                        "Intent",
-                        result["intent"],
-                    )
-
-                    st.caption(
-                        f"Confidence: "
-                        f"{result['intent_confidence']:.2f}"
-                    )
-
-                st.write(
-                    f"**Reason:** {result['reason']}"
-                )
-
-            except Exception as error:
-
-                st.error(
-                    "Business analysis is temporarily unavailable."
-                )
-
-                st.caption(
-                    f"Technical detail: {error}"
-                )
+    with st.expander("Business text analysis", expanded=False):
+        analysis_text = st.text_area(
+            "Enter text to analyze",
+            placeholder="Example: I am disappointed with the service and want my money refunded.",
+            height=120,
+        )
+        if st.button("Analyze Sentiment & Intent", type="primary"):
+            if not analysis_text.strip():
+                st.warning("Please enter some text to analyze.")
+            else:
+                try:
+                    with st.spinner("Analyzing text..."):
+                        result = analyze_sentiment_intent(analysis_text, client)
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.metric("Sentiment", result["sentiment"])
+                        st.caption(f"Confidence: {result['sentiment_confidence']:.2f}")
+                    with col2:
+                        st.metric("Intent", result["intent"])
+                        st.caption(f"Confidence: {result['intent_confidence']:.2f}")
+                    st.write(f"**Reason:** {result['reason']}")
+                except Exception as error:
+                    st.error("Business analysis is temporarily unavailable.")
+                    st.caption(f"Technical detail: {error}")

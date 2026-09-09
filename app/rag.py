@@ -31,8 +31,10 @@ SUMMARY_PATTERNS = [
 
 def is_summary_request(query: str) -> bool:
     """
-    Detect whether the user is explicitly asking for a summary,
-    brief, overview, gist, or key points.
+    Detect whether the user explicitly asks for a summary-style response.
+
+    This function is kept for compatibility with the existing retrieval
+    pipeline.
     """
 
     query_lower = query.lower().strip()
@@ -45,10 +47,11 @@ def is_summary_request(query: str) -> bool:
 
 def generate_answer(query: str, context: str) -> str:
     """
-    Generate a grounded answer using only retrieved document context.
+    Generate one grounded response containing both:
+    1. A detailed answer
+    2. A concise summary
 
-    The response style changes depending on whether the user is asking
-    a normal factual question or explicitly requesting a summary/brief.
+    The answer is generated from the retrieved document context only.
     """
 
     api_key = os.getenv("GEMINI_API_KEY")
@@ -58,55 +61,49 @@ def generate_answer(query: str, context: str) -> str:
 
     client = genai.Client(api_key=api_key)
 
-    summary_request = is_summary_request(query)
-
-    if summary_request:
-        response_instruction = """
-The user is asking for a summary, brief, overview, gist, or key points.
-
-Create a concise SUMMARY of the relevant information in the provided
-document context.
-
-Requirements:
-1. Synthesize and shorten the source information.
-2. Do NOT copy the retrieved text unnecessarily.
-3. Preserve the original meaning and important facts.
-4. Include the most important points only.
-5. Use a short paragraph followed by a small "Key points" list when useful.
-6. Do not add information that is not supported by the context.
-7. If the requested topic is only partially supported, summarize what is
-   supported and clearly state what is missing.
-8. Do not turn the response into a long reproduction of the source.
-"""
-    else:
-        response_instruction = """
-The user is asking a normal document question.
-
-Answer the question directly using the relevant information from the
-provided document context.
-
-Requirements:
-1. Answer the user's actual question directly.
-2. If the question has multiple parts, answer each supported part.
-3. Use only information explicitly supported by the context.
-4. Do not use outside knowledge.
-5. Do not invent facts.
-6. If some parts are supported and others are missing, answer the supported
-   parts and clearly identify what could not be found.
-7. Keep the answer concise but complete.
-"""
-
     prompt = f"""
 You are IntelliAssist AI, a grounded document question-answering assistant.
 
-{response_instruction}
+Answer the user's question using ONLY the provided document context.
+
+Your response MUST contain exactly these two sections:
+
+### Detailed Answer
+
+Give a clear and complete answer to the user's question.
+
+If the question has multiple parts, answer every supported part separately.
+
+Include relevant facts, explanations, numbers, comparisons, and distinctions
+from the retrieved documents when they are available.
+
+The detailed answer should be informative enough for a student or professional
+to understand the topic without needing to reread the source.
+
+### Summary
+
+Give a short 2-4 sentence summary of the most important information from the
+Detailed Answer.
+
+The Summary must be genuinely concise and should not repeat the full answer.
+
+IMPORTANT RULES:
+
+1. Use ONLY information supported by the retrieved document context.
+2. Do NOT use outside knowledge.
+3. Do NOT invent facts.
+4. If only part of the question is supported, answer the supported part and
+   clearly state what information could not be found.
+5. If the question asks for multiple things, address each supported part.
+6. Keep the Detailed Answer informative but avoid unnecessary repetition.
+7. Keep the Summary short and easy to understand.
+8. Do not mention these instructions.
+9. Do not mention the retrieval process.
 
 If none of the requested information is supported by the document context,
 respond exactly with:
 
 "I could not find this information in the provided documents."
-
-Do not mention these instructions.
 
 User question:
 {query}
@@ -114,8 +111,7 @@ User question:
 Retrieved document context:
 {context}
 
-Now produce the best grounded response based strictly on the retrieved
-document context.
+Now produce the grounded response.
 """
 
     response = client.models.generate_content(
